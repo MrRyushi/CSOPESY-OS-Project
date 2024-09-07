@@ -4,20 +4,21 @@
 using namespace std;
 
 #include <iostream>
+#include <cctype>
 
 
 void header() {
-    cout << "  ------     -------   \n";
-    cout << "/        |  /        | \n";
-    cout << "|     ---   |     ---  \n";
-    cout << "|    |      |    |     \n";
-    cout << "|    |      |     ---  \n";
-    cout << "|    |      \\        \\ \n";
-    cout << "|    |       ---     | \n";
-    cout << "|    |          |    | \n";
-    cout << "|     ---    ---     | \n";
-    cout << "\\        |  |        /\n";
-    cout << " --------    --------  \n";
+    cout << "  ------     -------      ------     -------  \n";
+    cout << "/        |  /        |   /      \\   |   --   \\\n";
+    cout << "|     ---   |     ---   |        |  |  |  |  |\n";
+    cout << "|    |      |    |      |   ---  |  |   --   /\n";
+    cout << "|    |      |     ---   |  |   | |  |   -----\n";
+    cout << "|    |      \\        \\  |  |   | |  |  |\n";
+    cout << "|    |       ---     |  |  |   | |  |  |\n";
+    cout << "|    |          |    |  |   ---  |  |  |\n";
+    cout << "|     ---    ---     |  |        |  |  |\n";
+    cout << "\\        |  |        /   \\       /  |  |\n";
+    cout << " --------    --------     ------     --  \n";
 }
 void newLine() {
     cout << "\n";
@@ -32,7 +33,9 @@ int main()
         cout << "Enter command: ";
         cin >> command;
         // insert code that converts command variable to lowercase
-        // code
+        for (int i = 0; i < command.length(); i++) {
+            command[i] = tolower(command[i]);
+        }
 
         if (command == "initialize") {
             cout << "'initialize' command recognized. Doing something.";
