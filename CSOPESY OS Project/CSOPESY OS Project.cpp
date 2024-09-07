@@ -19,6 +19,9 @@ void header() {
     cout << "\\        |  |        /\n";
     cout << " --------    --------  \n";
 }
+void newLine() {
+    cout << "\n";
+}
 
 int main()
 {
@@ -30,14 +33,37 @@ int main()
         cin >> command;
         // insert code that converts command variable to lowercase
         // code
-        
-  
-        // add conditions here for other commands
-        if (command == "clear") {
+
+        if (command == "initialize") {
+            cout << "'initialize' command recognized. Doing something.";
+            newLine();
+        }
+        else if (command == "screen") {
+            cout << "'screen' command recognized. Doing something.";
+            newLine();
+        }
+        else if (command == "scheduler-test") {
+            cout << "'scheduler-test' command recognized. Doing something.";
+            newLine();
+        }
+        else if (command == "scheduler-stop") {
+            cout << "'scheduler-stop' command recognized. Doing something.";
+            newLine();
+        }
+        else if (command == "report-util") {
+            cout << "'report-util' command recognized. Doing something.";
+            newLine();
+        }       
+        else if (command == "clear") {
             system("cls");
             header();
         }
+        else if (command != "exit") {
+            cout << "'" << command << "' command not recognized";
+            newLine();
+        }
     }
 
+    return 0;
 }
 
