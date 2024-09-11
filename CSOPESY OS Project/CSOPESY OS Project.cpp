@@ -49,23 +49,10 @@ void newLine() {
     cout << "\n";
 }
 
-void help() {
-    cout << "List of commands:\n";
-    cout << "initialize     - Initializes the program\n";
-    cout << "screen         - Displays the screen\n";
-    cout << "scheduler-test - Tests the scheduler\n";
-    cout << "scheduler-stop - Stops the scheduler\n";
-    cout << "report-util    - Generates a report\n";
-    cout << "clear          - Clears the screen\n";
-    cout << "help           - Displays the list of commands\n";
-    cout << "exit           - Exits the program\n";
-}
-
 int main()
 {
     header();
     newLine();
-    help();
     string command = "";
 
     while (command != "exit") {
@@ -99,9 +86,7 @@ int main()
         else if (command == "clear") {
             system("cls");
             header();
-        }
-        else if (command == "help") {
-            help();
+            newLine();
         }
         else if (command != "exit") {
             cout << "'" << command << "' command not recognized.";
