@@ -25,6 +25,9 @@ struct Screen {
     string timestamp;
 };
 
+vector<string> outputHistory;
+vector<Screen> screens;
+
 void header() {
     cout << "             ________________________________________________\n";
     cout << "            /                                                \\\n";
@@ -53,6 +56,7 @@ void header() {
     cout << ":-------------------------------------------------------------------------:\n";
     cout << "---._.-------------------------------------------------------------._.---'\n";
     cout << "\n________________________________________________________________________________\n";
+    newLine();
 }
 void newLine() {
     cout << "\n";
@@ -61,26 +65,34 @@ void newLine() {
 void clearScreen() {
     system("cls");
     header();
-    newLine();
+}
+
+void clearOutputHistory() {
+	outputHistory.clear();
+}
+
+void displayOutputHistory() {
+	for (int i = 0; i < outputHistory.size(); i++) {
+		cout << outputHistory[i] << endl;
+	}
 }
 
 string getCurrentTimestamp() {
     // Get current time as time_t object
     std::time_t currentTime = std::time(nullptr);
-
     // Create tm structure to store local time
     std::tm localTime;
-
-    // Convert time_t to tm structure (safe version using localtime_s)
+    // Convert time_t to tm structure 
     localtime_s(&localTime, &currentTime);
-
     // Create a buffer to store the formatted time
     char timeBuffer[100];
-
     // Format the time (MM/DD/YYYY, HH:MM:SS AM/PM)
     std::strftime(timeBuffer, sizeof(timeBuffer), "%m/%d/%Y, %I:%M:%S %p", &localTime);
-
     return timeBuffer;
+}
+
+void storeOutput(string text) {
+	outputHistory.push_back(text);
 }
 
 void displayScreen(Screen screen) {
@@ -95,19 +107,19 @@ void displayScreen(Screen screen) {
         cin >> processCommand;
     }
     clearScreen();
+	displayOutputHistory();
 }
 
-int main()
-{
-    header();
-    newLine();
+void handleCommands() {
     string command = "";
-
-    vector<Screen> screens;
 
     while (command != "exit") {
         cout << "Enter command: ";
         cin >> command;
+        if (command != "screen") {
+            storeOutput("Enter command: " + command);
+        }
+
         // insert code that converts command variable to lowercase
         for (int i = 0; i < command.length(); i++) {
             command[i] = tolower(command[i]);
@@ -116,33 +128,36 @@ int main()
         if (command == "initialize") {
             cout << "'initialize' command recognized. Doing something.";
             newLine();
+            storeOutput("'initialize' command recognized. Doing something.");
         }
         else if (command == "scheduler-test") {
             cout << "'scheduler-test' command recognized. Doing something.";
             newLine();
+            storeOutput("'scheduler-test' command recognized. Doing something.");
         }
         else if (command == "scheduler-stop") {
             cout << "'scheduler-stop' command recognized. Doing something.";
             newLine();
+            storeOutput("'scheduler-stop' command recognized. Doing something.");
         }
         else if (command == "report-util") {
             cout << "'report-util' command recognized. Doing something.";
             newLine();
-        }       
+            storeOutput("'report-util' command recognized. Doing something.");
+        }
         else if (command == "clear") {
             clearScreen();
         }
         else if (command == "screen") {
             string screenCommand;
-
+            string processName;
             cin >> screenCommand;
 
             // creates a new process
             if (screenCommand == "-s") {
                 // get the process name
-                string processName;
-                cin >> processName;
 
+                cin >> processName;
                 if (!processName.empty()) {
                     // create new instance of the screen ( hard line of instructions )
                     Screen newScreen = { processName, 1, 10, getCurrentTimestamp() };
@@ -152,13 +167,24 @@ int main()
                     displayScreen(newScreen);
                 }
             }
+            // read an existing process
+            // place code here 
+
+            storeOutput("Enter command: screen " + screenCommand + " " + processName);
+
         }
         else if (command != "exit") {
             cout << "'" << command << "' command not recognized.";
             newLine();
+			storeOutput("'" + command + "' command not recognized.");
         }
     }
+}
 
+int main()
+{
+    header();
+    handleCommands();
     return 0;
 }
 
