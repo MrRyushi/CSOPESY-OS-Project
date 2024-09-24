@@ -28,6 +28,10 @@ struct Screen {
 vector<string> outputHistory;
 vector<Screen> screens;
 
+void newLine() {
+    cout << "\n";
+}
+
 void header() {
     cout << "             ________________________________________________\n";
     cout << "            /                                                \\\n";
@@ -57,9 +61,6 @@ void header() {
     cout << "---._.-------------------------------------------------------------._.---'\n";
     cout << "\n________________________________________________________________________________\n";
     newLine();
-}
-void newLine() {
-    cout << "\n";
 }
 
 void clearScreen() {
@@ -156,21 +157,53 @@ void handleCommands() {
             // creates a new process
             if (screenCommand == "-s") {
                 // get the process name
-
                 cin >> processName;
-                if (!processName.empty()) {
-                    // create new instance of the screen ( hard line of instructions )
+                storeOutput("Enter command: screen " + screenCommand + " " + processName);
+
+                // Check if processName already exists in the vector
+                bool processExists = false;
+                for (int i = 0; i < screens.size(); i++) {
+                    if (screens[i].processName == processName) {
+                        processExists = true;
+                        break;
+                    }
+                }
+
+                if (processExists) {
+                    cout << "Error: process name already exists" << endl;
+                }
+                else if (!processName.empty()) {
+                    // If the process name doesn't exist and is not empty, add a new screen
                     Screen newScreen = { processName, 1, 10, getCurrentTimestamp() };
-                    // push the new process to the vector
                     screens.push_back(newScreen);
                     system("cls");
                     displayScreen(newScreen);
                 }
             }
-            // read an existing process
-            // place code here 
 
-            storeOutput("Enter command: screen " + screenCommand + " " + processName);
+            // read an existing process
+            else if (screenCommand == "-r") {
+                cin >> processName;
+                storeOutput("Enter command: screen " + screenCommand + " " + processName);
+
+                bool processFound = false;  // Flag to check if processName is found
+
+                for (int i = 0; i < screens.size(); i++) {
+                    if (screens[i].processName == processName) {
+                        processFound = true;
+                        system("cls");
+                        displayScreen(screens[i]);
+                        break;  // Exit loop after finding the process
+                    }
+                }
+
+                if (!processFound) {
+                    cout << "Error: process name not found" << endl;
+                }
+            }
+
+
+ 
 
         }
         else if (command != "exit") {
