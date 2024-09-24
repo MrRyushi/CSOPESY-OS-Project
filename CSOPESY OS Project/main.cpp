@@ -16,6 +16,7 @@ using namespace std;
 #include <cctype>
 #include <vector>
 #include <ctime>
+#include "ConsoleManager.h"
 
 // structure to represent a screen process
 struct Screen {
@@ -27,45 +28,15 @@ struct Screen {
 
 vector<string> outputHistory;
 vector<Screen> screens;
+ConsoleManager consoleManager;
 
 void newLine() {
     cout << "\n";
 }
 
-void header() {
-    cout << "             ________________________________________________\n";
-    cout << "            /                                                \\\n";
-    cout << "           |    _________________________________________     |\n";
-    cout << "           |   |                                         |    |\n";
-    cout << "           |   |                                         |    |\n";
-    cout << "           |   |                                         |    |\n";
-    cout << "           |   |                    _______ _______      |    |\n";
-    cout << "           |   |      .-----.--.--.|       |     __|     |    |\n";
-    cout << "           |   |      |  _  |  |  ||   -   |__     |     |    |\n";
-    cout << "           |   |      |___  |_____||_______|_______|     |    |\n";
-    cout << "           |   |      |_____|                            |    |\n";
-    cout << "           |   |                                         |    |\n";
-    cout << "           |   |                                         |    |\n";
-    cout << "           |   |                                         |    |\n";
-    cout << "           |   |_________________________________________|    |\n";
-    cout << "           |                                                  |\n";
-    cout << "            \\_________________________________________________/\n";
-    cout << "   		  \\___________________________________/\n";
-    cout << "                ___________________________________________\n";
-    cout << "             _-'    .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.  --- -_\n";
-    cout << "          _-'.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.--.  .-.-.-_\n";
-    cout << "       _-'.-.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-__. .-.-.-.-_\n";
-    cout << "    _-'.-.-.-.-. .-----.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-----. .-.-.-.-.-_\n";
-    cout << " _-'.-.-.-.-.-. .---.-. .-------------------------. .-.---. .---.-.-.-.-_\n";
-    cout << ":-------------------------------------------------------------------------:\n";
-    cout << "---._.-------------------------------------------------------------._.---'\n";
-    cout << "\n________________________________________________________________________________\n";
-    newLine();
-}
-
 void clearScreen() {
     system("cls");
-    header();
+	consoleManager.printHeader();
 }
 
 void clearOutputHistory() {
@@ -216,7 +187,7 @@ void handleCommands() {
 
 int main()
 {
-    header();
+	consoleManager.printHeader();
     handleCommands();
     return 0;
 }
