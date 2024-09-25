@@ -8,6 +8,10 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
 	this->timestamp = timestamp;
 }
 
+Screen::Screen()
+{
+}
+
 Screen::~Screen()
 {
 }
