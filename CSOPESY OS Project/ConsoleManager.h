@@ -1,5 +1,7 @@
 #pragma once
 #include "AConsole.h"
+#include "Screen.h"
+#include <unordered_map>
 
 const String MAIN_CONSOLE = "MAIN_CONSOLE";
 
@@ -17,6 +19,9 @@ public:
 
 	void printHeader();
 	void drawConsole();
+	void destroy();
+	string getCurrentTimestamp();
+	std::unordered_map<std::string, Screen> getScreenMap();
 
 	void registerConsole(AConsole* screenRef);
 	void switchConsole(AConsole* screenRef);
@@ -28,4 +33,5 @@ private:
 
 	// declare consoles 
 	AConsole* currentConsole;
+	std::unordered_map<std::string, Screen> screenMap;
 };

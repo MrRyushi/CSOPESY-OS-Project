@@ -17,7 +17,8 @@ using namespace std;
 #include <vector>
 #include <ctime>
 #include "ConsoleManager.h"
-
+#include "InputManager.h"
+/*
 // structure to represent a screen process
 struct Screen {
     string processName;
@@ -81,7 +82,8 @@ void displayScreen(Screen screen) {
     clearScreen();
 	displayOutputHistory();
 }
-
+*/
+/*
 void handleCommands() {
     string command = "";
 
@@ -184,22 +186,27 @@ void handleCommands() {
         }
     }
 }
+*/
 
 int main()
 {
     ConsoleManager::initialize();
+	InputManager::initialize();
 
-    //// this should be called when displaying main console 
+    // this should be called when displaying main console 
     //ConsoleManager::getInstance()->printHeader();
 
     // register main screen
     ConsoleManager::getInstance()->registerConsole(new AConsole(MAIN_CONSOLE));
     
+    
     bool running = true;
-
+    ConsoleManager::getInstance()->drawConsole();
     while (running) {
-        ConsoleManager::getInstance()->drawConsole();
+        InputManager::getInstance()->handleMainConsoleInput();
     }
-    return 0;
+    
+	InputManager::getInstance()->destroy();
+    ConsoleManager::getInstance()->destroy();
 }
 
