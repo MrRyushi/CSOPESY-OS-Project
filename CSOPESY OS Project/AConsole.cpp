@@ -33,9 +33,9 @@ void AConsole::display()
 
 			cout << "SCREEN NAME: " << screenName << endl;
 			//temporary
-			consoleRegister = new AConsole(screenName);
+			//consoleRegister = new AConsole(screenName);
 
-			ConsoleManager::getInstance()->registerConsole(consoleRegister);
+			//ConsoleManager::getInstance()->registerConsole(consoleRegister);
 			/*ConsoleManager::getInstance()->switchConsole(consoleRegister);*/
 
 		}
@@ -49,10 +49,10 @@ void AConsole::display()
 
 		if (command == "exit") {
 			//temporary
-			consoleRegister = new AConsole(MAIN_CONSOLE);
+			//consoleRegister = new AConsole(MAIN_CONSOLE);
 
-			ConsoleManager::getInstance()->registerConsole(consoleRegister);
-			ConsoleManager::getInstance()->switchConsole(consoleRegister);
+			//ConsoleManager::getInstance()->registerConsole(consoleRegister);
+			//ConsoleManager::getInstance()->switchConsole(consoleRegister);
 		}
 	}
 }

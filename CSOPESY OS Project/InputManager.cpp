@@ -49,10 +49,20 @@ void InputManager::handleMainConsoleInput()
             // get the process name
             cin >> processName;
 			string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-            Screen screenInstance(processName, 1, 10, timestamp);
+
+        	//Screen screenInstance(processName, 1, 10, timestamp);
             // store the new screen in the screen map
-            ConsoleManager::getInstance()->getScreenMap()[processName] = screenInstance;
-            // switch console?? implement switch console first
+
+            //TODO: Implement registerConsole here instead of this->screenMap chuchu
+            // Create a new Screen instance
+            std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
+
+            // Call registerConsole and pass the shared pointer to the Screen instance
+            ConsoleManager::getInstance()->registerConsole(screenInstance);
+
+            // Optionally print the size of the screenMap
+            cout << "Size of screenMap: " << ConsoleManager::getInstance()->getScreenMap().size() << endl;
+
         }
 
         // read an existing process

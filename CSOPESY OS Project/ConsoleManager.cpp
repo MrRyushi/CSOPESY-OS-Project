@@ -10,7 +10,7 @@ ConsoleManager* ConsoleManager::consoleManager = consoleManager;
 // default constructor
 ConsoleManager::ConsoleManager()
 {
-    AConsole* currentConsole = nullptr; 
+    AConsole* currentConsole = nullptr;
 }
 
 void ConsoleManager::initialize() {
@@ -41,20 +41,22 @@ string ConsoleManager::getCurrentTimestamp() {
    
 }
 
-void ConsoleManager::registerConsole(AConsole* screenRef) {
-    //TODO: add console to console table
-    // -> hash table where key is the name and value is the AConsole pointer
+void ConsoleManager::registerConsole(std::shared_ptr<Screen> screenRef) {
+    //TODO: add screen to screenMap.
+    this->screenMap[screenRef->getProcessName()] = screenRef;
+
     system("cls");
-    this->currentConsole = screenRef; // this is just temporary. current console should be set in switch console function
+    //this->currentConsole = screenRef;
 }
 
 // TODO: implement switch console
 // change param to screen name to access hash table later on
-void ConsoleManager::switchConsole(AConsole* screenRef)
+void ConsoleManager::switchConsole(String screenName)
 {
-    //add hash table here
-    system("cls");
-    this->currentConsole = screenRef;
+
+    //looking up screenName in screenMap
+   //system("cls");
+    //this->currentConsole = screenName;
 }
 
 AConsole* ConsoleManager::getCurrentConsole()
@@ -68,9 +70,12 @@ ConsoleManager* ConsoleManager::getInstance()
     return consoleManager;
 }
 
-std::unordered_map<std::string, Screen> ConsoleManager::getScreenMap() {
+std::unordered_map<std::string, std::shared_ptr<Screen>> ConsoleManager::getScreenMap()
+{
     return this->screenMap;
 }
+;
+
 
 void ConsoleManager::printHeader() {
     cout << "             ________________________________________________\n";
@@ -102,3 +107,4 @@ void ConsoleManager::printHeader() {
     cout << "\n________________________________________________________________________________\n";
 	cout << "\n";
 }
+

@@ -197,9 +197,8 @@ int main()
     //ConsoleManager::getInstance()->printHeader();
 
     // register main screen
-    ConsoleManager::getInstance()->registerConsole(new AConsole(MAIN_CONSOLE));
-    
-    
+    //ConsoleManager::getInstance()->registerConsole(new AConsole(MAIN_CONSOLE));
+
     bool running = true;
     ConsoleManager::getInstance()->drawConsole();
     while (running) {

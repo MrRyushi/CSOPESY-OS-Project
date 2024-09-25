@@ -4,6 +4,9 @@ using namespace std;
 #include <iostream>
 class Screen
 {
+
+
+
 public:
 	Screen(string processName, int currentLine, int totalLine, string timestamp);
 	Screen();

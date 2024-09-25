@@ -1,4 +1,9 @@
 #pragma once
+#include <unordered_map>
+
+#include "AConsole.h"
+#include "Screen.h"
+
 class InputManager
 {
 public:
@@ -10,5 +15,7 @@ public:
 
 private:
 	static InputManager* inputManager;
+
+	//unordered_map<String, std::shared_ptr<Screen>> screenMap;
 };
 
