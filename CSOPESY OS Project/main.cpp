@@ -187,8 +187,19 @@ void handleCommands() {
 
 int main()
 {
-	consoleManager.printHeader();
-    handleCommands();
+    ConsoleManager::initialize();
+
+    //// this should be called when displaying main console 
+    //ConsoleManager::getInstance()->printHeader();
+
+    // register main screen
+    ConsoleManager::getInstance()->registerConsole(new AConsole(MAIN_CONSOLE));
+    
+    bool running = true;
+
+    while (running) {
+        ConsoleManager::getInstance()->drawConsole();
+    }
     return 0;
 }
 
