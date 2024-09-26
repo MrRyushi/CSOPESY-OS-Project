@@ -3,6 +3,7 @@ using namespace std;
 #include "ConsoleManager.h"
 #include <iostream>
 #include <unordered_map>
+#include "Screen.h"
 
 // stores the created instance of console manager
 ConsoleManager* ConsoleManager::consoleManager = consoleManager;
@@ -19,7 +20,21 @@ void ConsoleManager::initialize() {
 
 void ConsoleManager::drawConsole() {
     //this->currentConsole->display();
-    this->printHeader();
+    system("cls");
+    string consoleName = this->getCurrentConsole()->getConsoleName();
+
+    if (this->getCurrentConsole()->getConsoleName() == MAIN_CONSOLE) {
+        this->printHeader();
+    }
+    else {
+        if (this->screenMap.contains(consoleName)) {
+            cout << "Screen Name: " << this->screenMap[consoleName]->getConsoleName() << endl;
+            cout << "Current line of instruction / Total line of instruaction: ";
+            cout << this->screenMap[consoleName]->getCurrentLine();
+            cout << "/" << this->screenMap[consoleName]->getTotalLine() << endl;
+            cout << "Timestamp: " << this->screenMap[consoleName]->getTimestamp() << endl;
+        }
+    }
 }
 
 void ConsoleManager::destroy() {
@@ -41,9 +56,9 @@ string ConsoleManager::getCurrentTimestamp() {
    
 }
 
-void ConsoleManager::registerConsole(std::shared_ptr<Screen> screenRef) {
+void ConsoleManager::registerConsole(std::shared_ptr<BaseScreen> screenRef) {
     //TODO: add console to console table
-    this->screenMap[screenRef->getProcessName()] = screenRef;
+    this->screenMap[screenRef->getConsoleName()] = screenRef; //it should accept MainScreen and ProcessScreen
 
     // -> hash table where key is the name and value is the AConsole pointer
     system("cls");
@@ -52,16 +67,35 @@ void ConsoleManager::registerConsole(std::shared_ptr<Screen> screenRef) {
 
 // TODO: implement switch console
 // change param to screen name to access hash table later on
-void ConsoleManager::switchConsole(AConsole* screenRef)
+void ConsoleManager::switchConsole(string consoleName)
 {
     //add hash table here
-    system("cls");
-    this->currentConsole = screenRef;
+    if (this->screenMap.contains(consoleName)) {
+        // Clear the screen
+        /*system("cls");*/
+        //TODO: make this work
+        /*this->previousConsole = this->currentConsole;*/
+        this->currentConsole = this->screenMap[consoleName];
+
+        if (consoleName == MAIN_CONSOLE){
+            this->drawConsole();
+        }
+
+        /*this->currentConsole->onEnabled();*/
+    }
+    else {
+    cout << "Console name" << consoleName << " not found. Was it initialized?" << endl;
+    }
 }
 
-AConsole* ConsoleManager::getCurrentConsole()
+std::shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
 {
     return this->currentConsole;
+}
+
+void ConsoleManager::setCurrentConsole(std::shared_ptr<BaseScreen> screenRef)
+{
+    this->currentConsole = screenRef;
 }
 
 
@@ -70,7 +104,15 @@ ConsoleManager* ConsoleManager::getInstance()
     return consoleManager;
 }
 
-std::unordered_map<std::string, std::shared_ptr<Screen>> ConsoleManager::getScreenMap() {
+void ConsoleManager::exitApplication() {
+    this->running = false;
+}
+
+bool ConsoleManager::isRunning() {
+    return this->running;
+}
+
+std::unordered_map<std::string, std::shared_ptr<BaseScreen>> ConsoleManager::getScreenMap() {
     return this->screenMap;
 }
 
@@ -103,4 +145,6 @@ void ConsoleManager::printHeader() {
     cout << "---._.-------------------------------------------------------------._.---'\n";
     cout << "\n________________________________________________________________________________\n";
 	cout << "\n";
+    
+    /*cout << "MEOW MEOW MOEW" << endl;*/
 }

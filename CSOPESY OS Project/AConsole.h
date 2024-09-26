@@ -10,5 +10,5 @@ public:
 
 	AConsole(String name);
 
-	void display();
+	/*void display();*/
 };

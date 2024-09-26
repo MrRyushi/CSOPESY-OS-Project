@@ -1,6 +1,6 @@
 #include "Screen.h"
 
-Screen::Screen(string processName, int currentLine, int totalLine, string timestamp)
+Screen::Screen(string processName, int currentLine, int totalLine, string timestamp): BaseScreen(processName)
 {
 	this->processName = processName;
 	this->currentLine = currentLine;
@@ -8,14 +8,14 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
 	this->timestamp = timestamp;
 }
 
-Screen::Screen(string processName)
-{
-	this->processName = processName;
-}
+//Screen::Screen(string processName): BaseScreen(processName)
+//{
+//	
+//}
 
-Screen::Screen()
-{
-}
+//Screen::Screen()
+//{
+//}
 
 Screen::~Screen()
 {
@@ -43,21 +43,26 @@ void Screen::setTimestamp(string timestamp)
 
 string Screen::getProcessName()
 {
-	return processName;
+	return this->processName;
 }
 
 int Screen::getCurrentLine()
 {
-	return currentLine;
+	return this->currentLine;
 }
 
 int Screen::getTotalLine()
 {
-	return totalLine;
+	return this->totalLine;
 }
 
 string Screen::getTimestamp()
 {
-	return timestamp;
+	return this->timestamp;
 }
+
+//void Screen::drawScreen()
+//{
+//	cout << "This is a sample screen." << endl;
+//}
 

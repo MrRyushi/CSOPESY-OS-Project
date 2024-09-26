@@ -21,17 +21,22 @@ public:
 	void drawConsole();
 	void destroy();
 	string getCurrentTimestamp();
-	std::unordered_map<String, std::shared_ptr<Screen>> getScreenMap();
+	std::unordered_map<String, std::shared_ptr<BaseScreen>> getScreenMap();
 
-	void registerConsole(std::shared_ptr<Screen>);
-	void switchConsole(AConsole* screenRef);
-	AConsole* getCurrentConsole();
+	void registerConsole(std::shared_ptr<BaseScreen> screenRef);
+	void switchConsole(string consoleName);
+	std::shared_ptr<BaseScreen> getCurrentConsole();
+
+	void exitApplication();
+	bool isRunning();
+	void setCurrentConsole(std::shared_ptr<BaseScreen> screenRef);
 
 private:
 	// stores the console manager pointer so that we only instantiate once
 	static ConsoleManager* consoleManager;
+	bool running = true;
 
 	// declare consoles 
-	AConsole* currentConsole;
-	std::unordered_map<String, std::shared_ptr<Screen>> screenMap;
+	std::shared_ptr<BaseScreen> currentConsole;
+	std::unordered_map<String, std::shared_ptr<BaseScreen>> screenMap;
 };

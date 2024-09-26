@@ -18,6 +18,8 @@ using namespace std;
 #include <ctime>
 #include "ConsoleManager.h"
 #include "InputManager.h"
+#include "BaseScreen.h"
+#include "MainScreen.h"
 /*
 // structure to represent a screen process
 struct Screen {
@@ -194,19 +196,23 @@ int main()
 	InputManager::initialize();
 
     // this should be called when displaying main console 
-    //ConsoleManager::getInstance()->printHeader();
 
     // register main screen
-    ConsoleManager::getInstance()->registerConsole(std::make_shared<Screen>(MAIN_CONSOLE));
-    
+    std::shared_ptr<BaseScreen> mainScreen = std::make_shared<MainScreen>(MAIN_CONSOLE);
+
+    ConsoleManager::getInstance()->registerConsole(mainScreen);
+    ConsoleManager::getInstance()->setCurrentConsole(mainScreen);
     
     bool running = true;
     ConsoleManager::getInstance()->drawConsole();
-    while (running) {
+    while (running){
         InputManager::getInstance()->handleMainConsoleInput();
+        running = ConsoleManager::getInstance()->isRunning();
     }
     
 	InputManager::getInstance()->destroy();
     ConsoleManager::getInstance()->destroy();
+
+    return 0;
 }
 
