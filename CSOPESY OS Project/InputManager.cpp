@@ -49,15 +49,30 @@ void InputManager::handleMainConsoleInput()
             // get the process name
             cin >> processName;
 			string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-            Screen screenInstance(processName, 1, 10, timestamp);
+            //Screen screenInstance(processName, 1, 10, timestamp);
             // store the new screen in the screen map
-            ConsoleManager::getInstance()->getScreenMap()[processName] = screenInstance;
+
+            // Create a new screen instance
+            std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
+
+
+            //ConsoleManager::getInstance()->getScreenMap()[processName] = screenInstance;
+
+            // Call registerConsole and pass the shared pointer to the Screen instance
+            ConsoleManager::getInstance()->registerConsole(screenInstance);
+
+            // Optionally print the size of the screenMap
+            cout << "Size of screenMap: " << ConsoleManager::getInstance()->getScreenMap().size() << endl;
+
             // switch console?? implement switch console first
         }
 
         // read an existing process
         else if (screenCommand == "-r") {
             cin >> processName;
+        }
+        else if (input == "exit"){
+	        // one option is for the main screen exit and the other for the process screen
         }
     }
 }

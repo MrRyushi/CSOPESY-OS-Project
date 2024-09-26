@@ -197,7 +197,7 @@ int main()
     //ConsoleManager::getInstance()->printHeader();
 
     // register main screen
-    ConsoleManager::getInstance()->registerConsole(new AConsole(MAIN_CONSOLE));
+    ConsoleManager::getInstance()->registerConsole(std::make_shared<Screen>(MAIN_CONSOLE));
     
     
     bool running = true;

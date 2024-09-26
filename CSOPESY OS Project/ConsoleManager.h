@@ -21,9 +21,9 @@ public:
 	void drawConsole();
 	void destroy();
 	string getCurrentTimestamp();
-	std::unordered_map<std::string, Screen> getScreenMap();
+	std::unordered_map<String, std::shared_ptr<Screen>> getScreenMap();
 
-	void registerConsole(AConsole* screenRef);
+	void registerConsole(std::shared_ptr<Screen>);
 	void switchConsole(AConsole* screenRef);
 	AConsole* getCurrentConsole();
 
@@ -33,5 +33,5 @@ private:
 
 	// declare consoles 
 	AConsole* currentConsole;
-	std::unordered_map<std::string, Screen> screenMap;
+	std::unordered_map<String, std::shared_ptr<Screen>> screenMap;
 };

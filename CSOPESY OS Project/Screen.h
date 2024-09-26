@@ -6,6 +6,7 @@ class Screen
 {
 public:
 	Screen(string processName, int currentLine, int totalLine, string timestamp);
+	Screen(string processName);
 	Screen();
 	~Screen();
 	void setProcessName(string processName);

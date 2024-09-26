@@ -41,11 +41,13 @@ string ConsoleManager::getCurrentTimestamp() {
    
 }
 
-void ConsoleManager::registerConsole(AConsole* screenRef) {
+void ConsoleManager::registerConsole(std::shared_ptr<Screen> screenRef) {
     //TODO: add console to console table
+    this->screenMap[screenRef->getProcessName()] = screenRef;
+
     // -> hash table where key is the name and value is the AConsole pointer
     system("cls");
-    this->currentConsole = screenRef; // this is just temporary. current console should be set in switch console function
+    //this->currentConsole = screenRef; // this is just temporary. current console should be set in switch console function
 }
 
 // TODO: implement switch console
@@ -68,7 +70,7 @@ ConsoleManager* ConsoleManager::getInstance()
     return consoleManager;
 }
 
-std::unordered_map<std::string, Screen> ConsoleManager::getScreenMap() {
+std::unordered_map<std::string, std::shared_ptr<Screen>> ConsoleManager::getScreenMap() {
     return this->screenMap;
 }
 
