@@ -10,7 +10,4 @@ MainScreen::MainScreen()
 {
 }
 
-//other functions
-//drawMain -> printHeader
-
 

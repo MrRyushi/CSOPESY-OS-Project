@@ -72,9 +72,7 @@ void InputManager::handleMainConsoleInput()
                 ConsoleManager::getInstance()->drawConsole();
             }
             else if (screenCommand == "-r") {
-                //do something
                 cin >> processName;
-
                 ConsoleManager::getInstance()->switchConsole(processName);
                 ConsoleManager::getInstance()->drawConsole();
             }

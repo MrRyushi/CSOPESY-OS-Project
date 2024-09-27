@@ -9,7 +9,6 @@ public:
 	BaseScreen();
 
 	virtual string getConsoleName();
-
 	virtual string getProcessName();  
 	virtual int getCurrentLine();      
 	virtual int getTotalLine();     

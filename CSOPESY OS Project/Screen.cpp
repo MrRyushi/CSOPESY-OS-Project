@@ -8,15 +8,6 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
 	this->timestamp = timestamp;
 }
 
-//Screen::Screen(string processName): BaseScreen(processName)
-//{
-//	
-//}
-
-//Screen::Screen()
-//{
-//}
-
 Screen::~Screen()
 {
 }
@@ -60,9 +51,3 @@ string Screen::getTimestamp()
 {
 	return this->timestamp;
 }
-
-//void Screen::drawScreen()
-//{
-//	cout << "This is a sample screen." << endl;
-//}
-

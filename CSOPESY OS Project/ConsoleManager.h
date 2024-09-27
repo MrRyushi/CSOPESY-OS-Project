@@ -1,9 +1,9 @@
 #pragma once
-#include "AConsole.h"
 #include "Screen.h"
 #include <unordered_map>
+#include <string>
 
-const String MAIN_CONSOLE = "MAIN_CONSOLE";
+const string MAIN_CONSOLE = "MAIN_CONSOLE";
 
 class ConsoleManager
 {	
@@ -21,7 +21,7 @@ public:
 	void drawConsole();
 	void destroy();
 	string getCurrentTimestamp();
-	std::unordered_map<String, std::shared_ptr<BaseScreen>> getScreenMap();
+	std::unordered_map<string, std::shared_ptr<BaseScreen>> getScreenMap();
 
 	void registerConsole(std::shared_ptr<BaseScreen> screenRef);
 	void switchConsole(string consoleName);
@@ -38,5 +38,5 @@ private:
 
 	// declare consoles 
 	std::shared_ptr<BaseScreen> currentConsole;
-	std::unordered_map<String, std::shared_ptr<BaseScreen>> screenMap;
+	std::unordered_map<string, std::shared_ptr<BaseScreen>> screenMap;
 };

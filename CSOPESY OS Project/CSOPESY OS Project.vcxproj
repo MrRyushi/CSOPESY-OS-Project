@@ -128,7 +128,6 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="AConsole.cpp" />
     <ClCompile Include="BaseScreen.cpp" />
     <ClCompile Include="ConsoleManager.cpp" />
     <ClCompile Include="InputManager.cpp" />
@@ -137,7 +136,6 @@
     <ClCompile Include="Screen.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="AConsole.h" />
     <ClInclude Include="BaseScreen.h" />
     <ClInclude Include="ConsoleManager.h" />
     <ClInclude Include="ConsoleTable.h" />

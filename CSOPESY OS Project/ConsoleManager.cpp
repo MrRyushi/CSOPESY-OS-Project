@@ -11,7 +11,6 @@ ConsoleManager* ConsoleManager::consoleManager = consoleManager;
 // default constructor
 ConsoleManager::ConsoleManager()
 {
-    AConsole* currentConsole = nullptr; 
 }
 
 void ConsoleManager::initialize() {
@@ -19,7 +18,6 @@ void ConsoleManager::initialize() {
 }
 
 void ConsoleManager::drawConsole() {
-    //this->currentConsole->display();
     system("cls");
     string consoleName = this->getCurrentConsole()->getConsoleName();
 
@@ -57,31 +55,18 @@ string ConsoleManager::getCurrentTimestamp() {
 }
 
 void ConsoleManager::registerConsole(std::shared_ptr<BaseScreen> screenRef) {
-    //TODO: add console to console table
     this->screenMap[screenRef->getConsoleName()] = screenRef; //it should accept MainScreen and ProcessScreen
-
-    // -> hash table where key is the name and value is the AConsole pointer
     system("cls");
-    //this->currentConsole = screenRef; // this is just temporary. current console should be set in switch console function
 }
 
-// TODO: implement switch console
-// change param to screen name to access hash table later on
 void ConsoleManager::switchConsole(string consoleName)
 {
-    //add hash table here
     if (this->screenMap.contains(consoleName)) {
-        // Clear the screen
-        /*system("cls");*/
-        //TODO: make this work
-        /*this->previousConsole = this->currentConsole;*/
         this->currentConsole = this->screenMap[consoleName];
 
         if (consoleName == MAIN_CONSOLE){
             this->drawConsole();
         }
-
-        /*this->currentConsole->onEnabled();*/
     }
     else {
     cout << "Console name" << consoleName << " not found. Was it initialized?" << endl;
@@ -145,6 +130,4 @@ void ConsoleManager::printHeader() {
     cout << "---._.-------------------------------------------------------------._.---'\n";
     cout << "\n________________________________________________________________________________\n";
 	cout << "\n";
-    
-    /*cout << "MEOW MEOW MOEW" << endl;*/
 }
