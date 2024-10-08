@@ -26,6 +26,13 @@ int main()
     ConsoleManager::initialize();
 	InputManager::initialize();
 
+    // create 10 processes each with 100 commands
+    for (int i = 0; i < 10; i++) {
+        string processName = "Process" + to_string(i);
+        std::shared_ptr<BaseScreen> processScreen = std::make_shared<Screen>(processName, 1, 100, ConsoleManager::getInstance()->getCurrentTimestamp());
+        ConsoleManager::getInstance()->registerConsole(processScreen);
+    }
+
     // register main screen
     std::shared_ptr<BaseScreen> mainScreen = std::make_shared<MainScreen>(MAIN_CONSOLE);
 
@@ -34,6 +41,7 @@ int main()
     
     bool running = true;
     ConsoleManager::getInstance()->drawConsole();
+
     while (running){
         InputManager::getInstance()->handleMainConsoleInput();
         running = ConsoleManager::getInstance()->isRunning();
