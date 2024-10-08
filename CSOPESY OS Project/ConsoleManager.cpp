@@ -18,19 +18,21 @@ void ConsoleManager::initialize() {
 }
 
 void ConsoleManager::drawConsole() {
-    system("cls");
-    string consoleName = this->getCurrentConsole()->getConsoleName();
+    if (this->switchSuccessful) {
+        system("cls");
+        string consoleName = this->getCurrentConsole()->getConsoleName();
 
-    if (this->getCurrentConsole()->getConsoleName() == MAIN_CONSOLE) {
-        this->printHeader();
-    }
-    else {
-        if (this->screenMap.contains(consoleName)) {
-            cout << "Screen Name: " << this->screenMap[consoleName]->getConsoleName() << endl;
-            cout << "Current line of instruction / Total line of instruaction: ";
-            cout << this->screenMap[consoleName]->getCurrentLine();
-            cout << "/" << this->screenMap[consoleName]->getTotalLine() << endl;
-            cout << "Timestamp: " << this->screenMap[consoleName]->getTimestamp() << endl;
+        if (this->getCurrentConsole()->getConsoleName() == MAIN_CONSOLE) {
+            this->printHeader();
+        }
+        else {
+            if (this->screenMap.contains(consoleName)) {
+                cout << "Screen Name: " << this->screenMap[consoleName]->getConsoleName() << endl;
+                cout << "Current line of instruction / Total line of instruaction: ";
+                cout << this->screenMap[consoleName]->getCurrentLine();
+                cout << "/" << this->screenMap[consoleName]->getTotalLine() << endl;
+                cout << "Timestamp: " << this->screenMap[consoleName]->getTimestamp() << endl;
+            }
         }
     }
 }
@@ -67,9 +69,11 @@ void ConsoleManager::switchConsole(string consoleName)
         if (consoleName == MAIN_CONSOLE){
             this->drawConsole();
         }
+		this->switchSuccessful = true;
     }
     else {
-    cout << "Console name" << consoleName << " not found. Was it initialized?" << endl;
+        cout << "Console name " << consoleName << " not found. Was it initialized?" << endl;
+        this->switchSuccessful = false;
     }
 }
 

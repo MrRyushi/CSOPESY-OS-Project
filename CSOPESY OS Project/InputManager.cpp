@@ -64,18 +64,26 @@ void InputManager::handleMainConsoleInput()
 
                 cin >> processName;
 
-                string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-                std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
-                ConsoleManager::getInstance()->registerConsole(screenInstance);
+				if (ConsoleManager::getInstance()->getScreenMap().contains(processName)) {
+					cout << "Screen already exists." << endl;
+				}
+                else {
+                    string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
+                    std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
+                    ConsoleManager::getInstance()->registerConsole(screenInstance);
 
-                ConsoleManager::getInstance()->switchConsole(processName);
-                ConsoleManager::getInstance()->drawConsole();
+                    ConsoleManager::getInstance()->switchConsole(processName);
+                    ConsoleManager::getInstance()->drawConsole();
+                }
             }
             else if (screenCommand == "-r") {
                 cin >> processName;
                 ConsoleManager::getInstance()->switchConsole(processName);
                 ConsoleManager::getInstance()->drawConsole();
             }
+        }
+        else if (input == "print") {
+
         }
         else if (input == "exit") {
             ConsoleManager::getInstance()->exitApplication();

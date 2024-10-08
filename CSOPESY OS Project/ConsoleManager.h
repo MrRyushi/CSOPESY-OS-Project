@@ -35,6 +35,7 @@ private:
 	// stores the console manager pointer so that we only instantiate once
 	static ConsoleManager* consoleManager;
 	bool running = true;
+	bool switchSuccessful = true;
 
 	// declare consoles 
 	std::shared_ptr<BaseScreen> currentConsole;
