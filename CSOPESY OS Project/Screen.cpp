@@ -4,42 +4,44 @@
 
 namespace fs = std::filesystem; // alias for convenience
 
-Screen::Screen(string processName, int currentLine, int totalLine, string timestamp): BaseScreen(processName)
+Screen::Screen(string processName, int currentLine, int totalLine, string timestamp)
+    : BaseScreen(processName), cpuCoreID(-1), commandCounter(0), currentState(ProcessState::READY)
 {
-	this->processName = processName;
-	this->currentLine = currentLine;
-	this->totalLine = totalLine;
-	this->timestamp = timestamp;
+    this->processName = processName;
+    this->currentLine = currentLine;
+    this->totalLine = totalLine;
+    this->timestamp = timestamp;
 
-	// Specify the folder where the text files should be stored
-	std::string folderName = "text_files";
+    // Specify the folder where the text files should be stored
+    std::string folderName = "text_files";
 
-	// Check if the folder exists, and create it if it doesn't
-	if (!fs::exists(folderName)) {
-		fs::create_directory(folderName);
-	}
+    // Check if the folder exists, and create it if it doesn't
+    if (!fs::exists(folderName)) {
+        fs::create_directory(folderName);
+    }
 
-	// Define the full file path (folder + file name)
-	std::string filePath = folderName + "/" + processName + "_commands.txt";
+    // Define the full file path (folder + file name)
+    std::string filePath = folderName + "/" + processName + "_commands.txt";
 
-	// Open a file to write the print commands in the 'text_files' directory
-	std::ofstream outFile(filePath);
+    // Open a file to write the print commands in the 'text_files' directory
+    std::ofstream outFile(filePath);
 
-	// Check if file is open
-	if (!outFile.is_open()) {
-		std::cerr << "Failed to create file: " << processName + "_commands.txt" << std::endl;
-		return;
-	}
+    // Check if file is open
+    if (!outFile.is_open()) {
+        std::cerr << "Failed to create file: " << processName + "_commands.txt" << std::endl;
+        return;
+    }
 
-	// Populate the screen commands and write to file
-	for (int i = 0; i < 100; ++i) {
-		this->printCommands[i] = "Printing from " + this->getConsoleName();
-		outFile << this->printCommands[i] << std::endl;  // Write each command to the file
-	}
+    // Populate the screen commands and write to file
+    for (int i = 0; i < 100; ++i) {
+        this->printCommands[i] = "Printing from " + this->getConsoleName();
+        outFile << this->printCommands[i] << std::endl;  // Write each command to the file
+    }
 
-	// Close the file after writing all commands
-	outFile.close();
+    // Close the file after writing all commands
+    outFile.close();
 }
+
 
 Screen::~Screen()
 {
@@ -85,4 +87,34 @@ string Screen::getTimestamp()
 	return this->timestamp;
 }
 
+
+void Screen::executeCurrentCommand() const
+{
+	std::cout << this->printCommands[this->currentLine] << std::endl;
+}
+
+void Screen::moveToNextLine()
+{
+	this->currentLine++;
+}
+
+bool Screen::isFinished() const
+{
+	return this->currentLine >= this->totalLine;
+}
+
+int Screen::getCommandCounter() const
+{
+	return this->commandCounter;
+}
+
+int Screen::getCPUCoreID() const
+{
+	return this->cpuCoreID;
+}
+
+Screen::ProcessState Screen::getState() const
+{
+	return this->currentState;
+}
 

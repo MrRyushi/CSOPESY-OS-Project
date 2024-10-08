@@ -81,6 +81,9 @@ void InputManager::handleMainConsoleInput()
                 ConsoleManager::getInstance()->switchConsole(processName);
                 ConsoleManager::getInstance()->drawConsole();
             }
+            else if (screenCommand == "-ls") {
+                ConsoleManager::getInstance()->displayProcessList();
+            }
         }
         else if (input == "print") {
 
