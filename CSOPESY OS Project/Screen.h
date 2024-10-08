@@ -13,6 +13,7 @@ public:
 	void setCurrentLine(int currentLine);
 	void setTotalLine(int totalLine);
 	void setTimestamp(string timestamp);
+	void populateScreenCommands();
 
 	string getProcessName() override;
 	int getCurrentLine() override;
@@ -24,4 +25,5 @@ private:
 	int currentLine;
 	int totalLine;
 	string timestamp;
+	string printCommands[100];
 };

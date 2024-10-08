@@ -84,7 +84,18 @@ void InputManager::handleMainConsoleInput()
         }
         else if (input == "print") {
 
+			// This basically just iterates over the Screen Map and check if the object is a Screen
+            for (const auto& pair : ConsoleManager::getInstance()->getScreenMap()) {
+                std::shared_ptr<Screen> screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
+
+                // If the cast is successful, process the Screen object
+                if (screenPtr) {
+                    // Now you can call methods specific to Screen
+                    std::cout << "Screen: " << screenPtr->getProcessName() << std::endl;
+                }
+            }
         }
+
         else if (input == "exit") {
             ConsoleManager::getInstance()->exitApplication();
         }
