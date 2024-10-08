@@ -38,21 +38,26 @@ void Scheduler::addProcessToQueue(std::shared_ptr<Screen> process) {
 }
 
 void Scheduler::workerFunction(int coreId) {
-    while (schedulerRunning) {
-        std::shared_ptr<Screen> process;
+    while (schedulerRunning) { // Loop while the scheduler is running
+        std::shared_ptr<Screen> process; // A local variable to hold the process to be executed
 
         {
-            std::unique_lock<std::mutex> lock(queueMutex);
-            queueCondition.wait(lock, [this] { return !processQueue.empty() || !schedulerRunning; });
+            std::unique_lock<std::mutex> lock(queueMutex); // Lock the queue to prevent concurrent access
+            queueCondition.wait(lock, [this] {
+                return !processQueue.empty() || !schedulerRunning;
+                });
+            // Wait until either there's a process in the queue or the scheduler stops running
 
             if (!schedulerRunning && processQueue.empty()) break;
+            // If the scheduler stops running and no more processes are in the queue, exit the loop
 
-            process = processQueue.front();
-            processQueue.pop();
+            process = processQueue.front(); // Take the next process from the queue
+            processQueue.pop(); // Remove it from the queue
         }
 
         // Simulate process execution
         std::cout << "Core " << coreId << " is executing process: " << process->getProcessName() << std::endl;
-        std::this_thread::sleep_for(std::chrono::seconds(1)); // Simulate process execution time
+        std::this_thread::sleep_for(std::chrono::seconds(1)); // Simulate execution time
     }
 }
+
