@@ -1,3 +1,4 @@
+#pragma once
 using namespace std;
 
 #include "ConsoleManager.h"
@@ -5,13 +6,12 @@ using namespace std;
 #include <unordered_map>
 #include "Screen.h"
 
-// stores the created instance of console manager
-ConsoleManager* ConsoleManager::consoleManager = consoleManager;
 
-// default constructor
-ConsoleManager::ConsoleManager()
-{
-}
+// stores the created instance of console manager
+ConsoleManager* ConsoleManager::consoleManager = nullptr;
+
+ConsoleManager::ConsoleManager() {
+};
 
 void ConsoleManager::initialize() {
     consoleManager = new ConsoleManager();
@@ -28,7 +28,7 @@ void ConsoleManager::drawConsole() {
         else {
             if (this->screenMap.contains(consoleName)) {
                 cout << "Screen Name: " << this->screenMap[consoleName]->getConsoleName() << endl;
-                cout << "Current line of instruction / Total line of instruaction: ";
+                cout << "Current line of instruction / Total line of instruction: ";
                 cout << this->screenMap[consoleName]->getCurrentLine();
                 cout << "/" << this->screenMap[consoleName]->getTotalLine() << endl;
                 cout << "Timestamp: " << this->screenMap[consoleName]->getTimestamp() << endl;
@@ -38,25 +38,25 @@ void ConsoleManager::drawConsole() {
 }
 
 void ConsoleManager::destroy() {
+    consoleManager->scheduler.stop(); // Stop the scheduler
     delete consoleManager;
 }
 
 string ConsoleManager::getCurrentTimestamp() {
     // Get current time as time_t object
-    std::time_t currentTime = std::time(nullptr);
+    time_t currentTime = time(nullptr);
     // Create tm structure to store local time
-    std::tm localTime;
+    tm localTime;
     // Convert time_t to tm structure 
     localtime_s(&localTime, &currentTime);
     // Create a buffer to store the formatted time
     char timeBuffer[100];
     // Format the time (MM/DD/YYYY, HH:MM:SS AM/PM)
-    std::strftime(timeBuffer, sizeof(timeBuffer), "%m/%d/%Y, %I:%M:%S %p", &localTime);
+    strftime(timeBuffer, sizeof(timeBuffer), "%m/%d/%Y, %I:%M:%S %p", &localTime);
     return timeBuffer;
-   
 }
 
-void ConsoleManager::registerConsole(std::shared_ptr<BaseScreen> screenRef) {
+void ConsoleManager::registerConsole(shared_ptr<BaseScreen> screenRef) {
     this->screenMap[screenRef->getConsoleName()] = screenRef; //it should accept MainScreen and ProcessScreen
     system("cls");
 }
@@ -66,10 +66,11 @@ void ConsoleManager::switchConsole(string consoleName)
     if (this->screenMap.contains(consoleName)) {
         this->currentConsole = this->screenMap[consoleName];
 
-        if (consoleName == MAIN_CONSOLE){
+        if (consoleName == MAIN_CONSOLE) {
             this->drawConsole();
         }
-		this->switchSuccessful = true;
+    
+        this->switchSuccessful = true;
     }
     else {
         cout << "Console name " << consoleName << " not found. Was it initialized?" << endl;
@@ -77,16 +78,65 @@ void ConsoleManager::switchConsole(string consoleName)
     }
 }
 
-std::shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
+void ConsoleManager::displayProcessList() {
+    unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
+    Scheduler* scheduler = Scheduler::getInstance();
+    int coresUsed = scheduler->getCoresUsed();
+    int coresAvailable = scheduler->getCoresAvailable();
+	float cpuUtilization = (float)coresUsed / (coresUsed + coresAvailable) * 100;
+
+	cout << "\nCPU Utilization: " << cpuUtilization << "%" << endl;
+    cout << "Cores used: " << coresUsed << endl;
+	cout << "Cores available: " << coresAvailable << endl;
+	cout << "-----------------------------------" << endl;
+    cout << "Running processes:" << endl;
+    for (const auto& pair : screenMap) {
+        shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
+
+        if (screenPtr && !screenPtr->isFinished()) {
+
+            auto coreID = screenPtr->getCPUCoreID();
+            string coreIDstr;
+            if (coreID == -1) {
+                coreIDstr = "N/A";
+            }
+            else {
+                coreIDstr = to_string(coreID);
+            }
+
+            cout << "Name: " << screenPtr->getProcessName() << " | "
+                << screenPtr->getTimestamp() << " | "
+                << "Core: " << coreIDstr << " | "
+                << screenPtr->getCurrentLine() << "/"
+                << screenPtr->getTotalLine() << " | " << endl;
+        }
+    }
+
+    cout << "\nFinished processes:" << endl;
+    for (const auto& pair : screenMap) {
+        shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
+
+        if (screenPtr && screenPtr->isFinished()) {
+            cout << "Name: " << screenPtr->getProcessName() << " | "
+                << screenPtr->getTimestamp() << " | "
+                << "Core: " << screenPtr->getCPUCoreID() << " | "
+                << screenPtr->getCurrentLine() << "/"
+                << screenPtr->getTotalLine() << " | " << endl;
+        }
+    }
+    cout << "-----------------------------------" << endl;
+}
+
+
+shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
 {
     return this->currentConsole;
 }
 
-void ConsoleManager::setCurrentConsole(std::shared_ptr<BaseScreen> screenRef)
+void ConsoleManager::setCurrentConsole(shared_ptr<BaseScreen> screenRef)
 {
     this->currentConsole = screenRef;
 }
-
 
 ConsoleManager* ConsoleManager::getInstance()
 {
@@ -95,13 +145,14 @@ ConsoleManager* ConsoleManager::getInstance()
 
 void ConsoleManager::exitApplication() {
     this->running = false;
+	Scheduler::getInstance()->stop();
 }
 
 bool ConsoleManager::isRunning() {
     return this->running;
 }
 
-std::unordered_map<std::string, std::shared_ptr<BaseScreen>> ConsoleManager::getScreenMap() {
+unordered_map<string, shared_ptr<BaseScreen>> ConsoleManager::getScreenMap() {
     return this->screenMap;
 }
 
@@ -123,7 +174,7 @@ void ConsoleManager::printHeader() {
     cout << "           |   |_________________________________________|    |\n";
     cout << "           |                                                  |\n";
     cout << "            \\_________________________________________________/\n";
-    cout << "   		  \\___________________________________/\n";
+    cout << "              \\___________________________________/\n";
     cout << "                ___________________________________________\n";
     cout << "             _-'    .-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.-.  --- -_\n";
     cout << "          _-'.-.-. .---.-.-.-.-.-.-.-.-.-.-.-.-.-.-.--.  .-.-.-_\n";
@@ -133,5 +184,5 @@ void ConsoleManager::printHeader() {
     cout << ":-------------------------------------------------------------------------:\n";
     cout << "---._.-------------------------------------------------------------._.---'\n";
     cout << "\n________________________________________________________________________________\n";
-	cout << "\n";
+    cout << "\n";
 }

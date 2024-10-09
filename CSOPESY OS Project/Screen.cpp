@@ -1,45 +1,38 @@
 #include "Screen.h"
 #include <fstream> 
 #include <filesystem> // for folder creation
+#include "PrintCommand.h"
+#include <vector>
+#include <iostream>
+#include <thread>
+#include <chrono>
+
+using namespace std;
 
 namespace fs = std::filesystem; // alias for convenience
 
-Screen::Screen(string processName, int currentLine, int totalLine, string timestamp): BaseScreen(processName)
+Screen::Screen(string processName, int currentLine, int totalLine, string timestamp)
+    : BaseScreen(processName), cpuCoreID(-1), commandCounter(0), currentState(ProcessState::READY)
 {
-	this->processName = processName;
-	this->currentLine = currentLine;
-	this->totalLine = totalLine;
-	this->timestamp = timestamp;
+    this->processName = processName;
+    this->currentLine = currentLine;
+    this->totalLine = totalLine;
+    this->timestamp = timestamp;
 
-	// Specify the folder where the text files should be stored
-	std::string folderName = "text_files";
+	// create 100 print commands
+	for(int i=0; i<totalLine; i++){
+		this->printCommands.push_back(PrintCommand(i, "Printing from " + processName + " " + std::to_string(i)));
 
-	// Check if the folder exists, and create it if it doesn't
-	if (!fs::exists(folderName)) {
-		fs::create_directory(folderName);
 	}
 
-	// Define the full file path (folder + file name)
-	std::string filePath = folderName + "/" + processName + "_commands.txt";
-
-	// Open a file to write the print commands in the 'text_files' directory
-	std::ofstream outFile(filePath);
-
-	// Check if file is open
-	if (!outFile.is_open()) {
-		std::cerr << "Failed to create file: " << processName + "_commands.txt" << std::endl;
-		return;
-	}
-
-	// Populate the screen commands and write to file
-	for (int i = 0; i < 100; ++i) {
-		this->printCommands[i] = "Printing from " + this->getConsoleName();
-		outFile << this->printCommands[i] << std::endl;  // Write each command to the file
-	}
-
-	// Close the file after writing all commands
-	outFile.close();
+	/*
+	for(int i = 0; i < this->printCommands.size(); i++){
+		this->printCommands[i].execute();
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}*/
+	
 }
+
 
 Screen::~Screen()
 {
@@ -85,4 +78,39 @@ string Screen::getTimestamp()
 	return this->timestamp;
 }
 
+
+void Screen::executeCurrentCommand() 
+{
+	this->printCommands[this->currentLine].execute();
+}
+
+void Screen::moveToNextLine()
+{
+	this->currentLine++;
+}
+
+bool Screen::isFinished() const
+{
+	return this->currentLine >= this->totalLine;
+}
+
+int Screen::getCommandCounter() const
+{
+	return this->commandCounter;
+}
+
+int Screen::getCPUCoreID() const
+{
+	return this->cpuCoreID;
+}
+
+Screen::ProcessState Screen::getState() const
+{
+	return this->currentState;
+}
+
+void Screen::setCPUCoreID(int coreID)
+{
+	this->cpuCoreID = coreID;
+}
 

@@ -1,5 +1,7 @@
 #pragma once
 #include "BaseScreen.h"
+#include "PrintCommand.h"
+#include <vector>
 
 using namespace std;	
 
@@ -23,11 +25,12 @@ public:
 	void setTotalLine(int totalLine);
 	void setTimestamp(string timestamp);
 
-	void executeCurrentCommand() const;
+	void executeCurrentCommand();
 	void moveToNextLine();
 	bool isFinished() const;
 	int getCommandCounter() const;
 	int getCPUCoreID() const;
+	void setCPUCoreID(int coreID);
 	ProcessState getState() const;
 
 	string getProcessName() override;
@@ -44,7 +47,7 @@ private:
 	int commandCounter;
 	int cpuCoreID = -1;
 	string timestamp;
-	string printCommands[100];
+	std::vector<PrintCommand> printCommands;
 	ProcessState currentState;
 
 };
