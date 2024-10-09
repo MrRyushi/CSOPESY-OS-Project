@@ -70,9 +70,7 @@ void ConsoleManager::switchConsole(string consoleName)
         if (consoleName == MAIN_CONSOLE) {
             this->drawConsole();
         }
-        else if (consoleName == SCREEN_LS) {
-            ListScreen::getInstance()->drawProcessList();
-        }
+    
         this->switchSuccessful = true;
     }
     else {

@@ -37,11 +37,12 @@ int main()
         std::shared_ptr<Screen> screenPtr = std::static_pointer_cast<Screen>(processScreen);
 		scheduler.addProcessToQueue(screenPtr);
     }
-
-    scheduler.start();
+    
+	std::thread schedulerThread(&Scheduler::start, &scheduler);
+    schedulerThread.detach();
 
     
-
+    
     // register main screen
     std::shared_ptr<BaseScreen> mainScreen = std::make_shared<MainScreen>(MAIN_CONSOLE);
 

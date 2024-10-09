@@ -4,6 +4,7 @@ using namespace std;
 #include <iostream>
 #include "ConsoleManager.h"
 #include "Screen.h"
+#include "ListScreen.h"
 
 InputManager::InputManager()
 {
@@ -82,7 +83,7 @@ void InputManager::handleMainConsoleInput()
                 ConsoleManager::getInstance()->drawConsole();
             }
             else if (screenCommand == "-ls") {
-                ConsoleManager::getInstance()->switchConsole(SCREEN_LS);
+				ListScreen::getInstance()->drawProcessList();
 			}
 			else {
 				cout << "Command not recognized." << endl;
@@ -96,14 +97,12 @@ void InputManager::handleMainConsoleInput()
 		else {
 			cout << "Command not recognized." << endl;
 		}
-    }
+    } 
+
     // screen is at process
     else {
         if (input == "exit") {
             ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);
-        }
-        else {
-            ConsoleManager::getInstance()->drawConsole();
         }
     }
 

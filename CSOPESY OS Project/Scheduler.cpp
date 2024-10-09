@@ -56,7 +56,30 @@ void Scheduler::start() {
         }
     }
 
-	stop(); 
+    stop(); 
+    /*
+    while (processQueue.size() > 0) {
+
+        for (int i = 0; i < numCores; i++) {
+            if (processQueue.empty()) {
+                break;
+            }
+            else {
+                std::shared_ptr<Screen> process = processQueue.front();
+                workerThreads.emplace_back([this, i, process]() {
+                    workerFunction(i, process);
+                    
+                    });
+                processQueue.pop();
+            }     
+        }
+
+		for (auto& thread : workerThreads) {
+			if (thread.joinable()) {
+				thread.join();
+			}
+		}
+    }*/
 }
 
 void Scheduler::stop() {
@@ -70,12 +93,11 @@ void Scheduler::stop() {
 void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
     string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
     for (int i = 0; i < process->getTotalLine(); i++) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+        std::this_thread::sleep_for(std::chrono::milliseconds(200));
         process->setCurrentLine(process->getCurrentLine() + 1);
         process->setCPUCoreID(core);
         // Log the process execution (optional)
-        std::cout << timestamp << " core: " << core << " executing process "
-            << process->getCPUCoreID() << " line: " << process->getCurrentLine() << std::endl;
+     //   std::cout << timestamp << " core: " << core << " executing process " << process->getProcessName() << " line: " << process->getCurrentLine() << std::endl;
     }
 }
 

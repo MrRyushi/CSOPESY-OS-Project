@@ -12,7 +12,7 @@ ListScreen::ListScreen(string name) : BaseScreen(name)
 }
 
 void ListScreen::drawProcessList() 
-{
+{ 
     std::unordered_map<string, std::shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
     std::cout << "Running processes:" << std::endl;
     for (const auto& pair : screenMap) {
