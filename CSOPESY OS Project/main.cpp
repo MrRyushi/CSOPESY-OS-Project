@@ -26,15 +26,21 @@ int main()
 {
     ConsoleManager::initialize();
 	InputManager::initialize();
+	Scheduler scheduler = Scheduler(4);
 
     // create 10 processes each with 100 commands
     for (int i = 0; i < 10; i++) {
         string processName = "Process" + to_string(i);
         std::shared_ptr<BaseScreen> processScreen = std::make_shared<Screen>(processName, 1, 100, ConsoleManager::getInstance()->getCurrentTimestamp());
         ConsoleManager::getInstance()->registerConsole(processScreen);
+        // Cast processScreen to std::shared_ptr<Screen>
+        std::shared_ptr<Screen> screenPtr = std::static_pointer_cast<Screen>(processScreen);
+		scheduler.addProcessToQueue(screenPtr);
     }
 
+    scheduler.start();
 
+    
 
     // register main screen
     std::shared_ptr<BaseScreen> mainScreen = std::make_shared<MainScreen>(MAIN_CONSOLE);

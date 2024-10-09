@@ -4,6 +4,8 @@
 #include "PrintCommand.h"
 #include <vector>
 #include <iostream>
+#include <thread>
+#include <chrono>
 
 using namespace std;
 
@@ -23,9 +25,11 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
 
 	}
 
+	/*
 	for(int i = 0; i < this->printCommands.size(); i++){
 		this->printCommands[i].execute();
-	}
+		std::this_thread::sleep_for(std::chrono::milliseconds(500));
+	}*/
 	
 }
 
@@ -75,9 +79,9 @@ string Screen::getTimestamp()
 }
 
 
-void Screen::executeCurrentCommand() const
+void Screen::executeCurrentCommand() 
 {
-	std::cout << this->printCommands[this->currentLine] << std::endl;
+	this->printCommands[this->currentLine].execute();
 }
 
 void Screen::moveToNextLine()
@@ -103,5 +107,10 @@ int Screen::getCPUCoreID() const
 Screen::ProcessState Screen::getState() const
 {
 	return this->currentState;
+}
+
+void Screen::setCPUCoreID(int coreID)
+{
+	this->cpuCoreID = coreID;
 }
 

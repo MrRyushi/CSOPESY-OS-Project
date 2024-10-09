@@ -11,13 +11,14 @@
 class Scheduler {
 public:
     Scheduler(int numCores);
+    Scheduler();
     ~Scheduler();
     void start();
     void stop();
     void addProcessToQueue(std::shared_ptr<Screen> process);
+	void workerFunction(int core, std::shared_ptr<Screen> process);
 
 private:
-    void workerFunction(int coreId);
     int numCores;
     bool schedulerRunning;
     std::vector<std::thread> workerThreads;

@@ -11,11 +11,11 @@ using namespace std;
 // stores the created instance of console manager
 ConsoleManager* ConsoleManager::consoleManager = nullptr;
 
-ConsoleManager::ConsoleManager() : scheduler(4) {}
+ConsoleManager::ConsoleManager() {
+};
 
 void ConsoleManager::initialize() {
     consoleManager = new ConsoleManager();
-    consoleManager->scheduler.start(); // Start the scheduler
 }
 
 void ConsoleManager::drawConsole() {

@@ -10,6 +10,6 @@ void PrintCommand::execute()
 {
 	ICommand::execute();
 
-	std::cout << "PID: " << pid << "  Log: " << toPrint << std::endl;
+	std::cout << "PID: " << pid << "  Log: " << toPrint;
 
 }
