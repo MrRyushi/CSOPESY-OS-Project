@@ -1,5 +1,7 @@
 #pragma once
 #include "BaseScreen.h"
+#include "PrintCommand.h"
+#include <vector>
 
 using namespace std;	
 
@@ -44,7 +46,7 @@ private:
 	int commandCounter;
 	int cpuCoreID = -1;
 	string timestamp;
-	string printCommands[100];
+	std::vector<PrintCommand> printCommands;
 	ProcessState currentState;
 
 };

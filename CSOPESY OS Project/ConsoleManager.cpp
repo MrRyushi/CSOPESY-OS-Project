@@ -5,6 +5,7 @@ using namespace std;
 #include <iostream>
 #include <unordered_map>
 #include "Screen.h"
+#include "ListScreen.h"
 
 
 // stores the created instance of console manager
@@ -69,6 +70,9 @@ void ConsoleManager::switchConsole(string consoleName)
         if (consoleName == MAIN_CONSOLE) {
             this->drawConsole();
         }
+        else if (consoleName == SCREEN_LS) {
+            ListScreen::getInstance()->drawProcessList();
+        }
         this->switchSuccessful = true;
     }
     else {
@@ -77,33 +81,33 @@ void ConsoleManager::switchConsole(string consoleName)
     }
 }
 
-void ConsoleManager::displayProcessList() {
-    std::cout << "Running processes:" << std::endl;
-    for (const auto& pair : screenMap) {
-        std::shared_ptr<Screen> screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
-
-        if (screenPtr && !screenPtr->isFinished()) {
-            std::cout << screenPtr->getProcessName() << " "
-                << screenPtr->getTimestamp() << " "
-                << "core:" << screenPtr->getCPUCoreID() << " "
-                << screenPtr->getCurrentLine() << "/"
-                << screenPtr->getTotalLine() << std::endl;
-        }
-    }
-
-    std::cout << "\nFinished processes:" << std::endl;
-    for (const auto& pair : screenMap) {
-        std::shared_ptr<Screen> screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
-
-        if (screenPtr && screenPtr->isFinished()) {
-            std::cout << screenPtr->getProcessName() << " "
-                << screenPtr->getTimestamp() << " "
-                << "core:" << screenPtr->getCPUCoreID() << " "
-                << screenPtr->getCurrentLine() << "/"
-                << screenPtr->getTotalLine() << std::endl;
-        }
-    }
-}
+//void ConsoleManager::displayProcessList() {
+//    std::cout << "Running processes:" << std::endl;
+//    for (const auto& pair : screenMap) {
+//        std::shared_ptr<Screen> screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
+//
+//        if (screenPtr && !screenPtr->isFinished()) {
+//            std::cout << screenPtr->getProcessName() << " "
+//                << screenPtr->getTimestamp() << " "
+//                << "core:" << screenPtr->getCPUCoreID() << " "
+//                << screenPtr->getCurrentLine() << "/"
+//                << screenPtr->getTotalLine() << std::endl;
+//        }
+//    }
+//
+//    std::cout << "\nFinished processes:" << std::endl;
+//    for (const auto& pair : screenMap) {
+//        std::shared_ptr<Screen> screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
+//
+//        if (screenPtr && screenPtr->isFinished()) {
+//            std::cout << screenPtr->getProcessName() << " "
+//                << screenPtr->getTimestamp() << " "
+//                << "core:" << screenPtr->getCPUCoreID() << " "
+//                << screenPtr->getCurrentLine() << "/"
+//                << screenPtr->getTotalLine() << std::endl;
+//        }
+//    }
+//}
 
 std::shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
 {

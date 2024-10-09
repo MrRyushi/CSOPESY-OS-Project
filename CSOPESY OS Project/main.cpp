@@ -20,6 +20,7 @@ using namespace std;
 #include "InputManager.h"
 #include "BaseScreen.h"
 #include "MainScreen.h"
+#include "ListScreen.h"
 
 int main()
 {
@@ -33,11 +34,17 @@ int main()
         ConsoleManager::getInstance()->registerConsole(processScreen);
     }
 
+
+
     // register main screen
     std::shared_ptr<BaseScreen> mainScreen = std::make_shared<MainScreen>(MAIN_CONSOLE);
 
     ConsoleManager::getInstance()->registerConsole(mainScreen);
     ConsoleManager::getInstance()->setCurrentConsole(mainScreen);
+
+    // register screen ls
+    std::shared_ptr<BaseScreen> processListScreen = std::make_shared<ListScreen>(SCREEN_LS);
+    ConsoleManager::getInstance()->registerConsole(processListScreen);
     
     bool running = true;
     ConsoleManager::getInstance()->drawConsole();

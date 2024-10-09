@@ -1,6 +1,11 @@
 #include "Screen.h"
 #include <fstream> 
 #include <filesystem> // for folder creation
+#include "PrintCommand.h"
+#include <vector>
+#include <iostream>
+
+using namespace std;
 
 namespace fs = std::filesystem; // alias for convenience
 
@@ -11,6 +16,17 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
     this->currentLine = currentLine;
     this->totalLine = totalLine;
     this->timestamp = timestamp;
+
+	// create 100 print commands
+	for(int i=0; i<totalLine; i++){
+		this->printCommands.push_back(PrintCommand(i, "Printing from " + processName + " " + std::to_string(i)));
+
+	}
+
+	for(int i = 0; i < this->printCommands.size(); i++){
+		this->printCommands[i].execute();
+	}
+	
 }
 
 

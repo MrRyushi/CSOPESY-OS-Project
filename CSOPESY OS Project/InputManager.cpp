@@ -82,7 +82,7 @@ void InputManager::handleMainConsoleInput()
                 ConsoleManager::getInstance()->drawConsole();
             }
             else if (screenCommand == "-ls") {
-                ConsoleManager::getInstance()->displayProcessList();
+                ConsoleManager::getInstance()->switchConsole(SCREEN_LS);
 			}
 			else {
 				cout << "Command not recognized." << endl;
