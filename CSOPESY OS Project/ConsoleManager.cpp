@@ -119,7 +119,7 @@ void ConsoleManager::displayProcessList() {
         if (screenPtr && screenPtr->isFinished()) {
             cout << "Name: " << screenPtr->getProcessName() << " | "
                 << screenPtr->getTimestamp() << " | "
-                << "Core: " << screenPtr->getCPUCoreID() << " | "
+                << "Finished" << " | "
                 << screenPtr->getCurrentLine() << "/"
                 << screenPtr->getTotalLine() << " | " << endl;
         }
