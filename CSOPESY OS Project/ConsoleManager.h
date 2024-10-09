@@ -5,7 +5,6 @@
 #include <string>
 
 const string MAIN_CONSOLE = "MAIN_CONSOLE";
-const string SCREEN_LS = "SCREEN_LS";
 
 class ConsoleManager
 {	

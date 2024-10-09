@@ -17,14 +17,20 @@ public:
     void stop();
     void addProcessToQueue(std::shared_ptr<Screen> process);
 	void workerFunction(int core, std::shared_ptr<Screen> process);
+    static Scheduler* getInstance();
+    static void initialize(int numCores);
+
+    int getCoresUsed() const;
+    int getCoresAvailable() const;
+    int coresUsed = 0; // Tracks how many cores are currently used
+    int coresAvailable; // Tracks how many cores are available
 
 private:
     int numCores;
     bool schedulerRunning;
     std::vector<std::thread> workerThreads;
     std::queue<std::shared_ptr<Screen>> processQueue;
-    std::mutex queueMutex;
-    std::condition_variable queueCondition;
+	static Scheduler* scheduler;
 };
 
 #endif // SCHEDULER_H

@@ -132,7 +132,6 @@
     <ClCompile Include="ConsoleManager.cpp" />
     <ClCompile Include="ICommand.cpp" />
     <ClCompile Include="InputManager.cpp" />
-    <ClCompile Include="ListScreen.cpp" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="MainScreen.cpp" />
     <ClCompile Include="PrintCommand.cpp" />
@@ -145,7 +144,6 @@
     <ClInclude Include="ConsoleTable.h" />
     <ClInclude Include="ICommand.h" />
     <ClInclude Include="InputManager.h" />
-    <ClInclude Include="ListScreen.h" />
     <ClInclude Include="MainScreen.h" />
     <ClInclude Include="PrintCommand.h" />
     <ClInclude Include="Scheduler.h" />

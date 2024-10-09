@@ -5,7 +5,6 @@ using namespace std;
 #include <iostream>
 #include <unordered_map>
 #include "Screen.h"
-#include "ListScreen.h"
 
 
 // stores the created instance of console manager
@@ -45,19 +44,19 @@ void ConsoleManager::destroy() {
 
 string ConsoleManager::getCurrentTimestamp() {
     // Get current time as time_t object
-    std::time_t currentTime = std::time(nullptr);
+    time_t currentTime = time(nullptr);
     // Create tm structure to store local time
-    std::tm localTime;
+    tm localTime;
     // Convert time_t to tm structure 
     localtime_s(&localTime, &currentTime);
     // Create a buffer to store the formatted time
     char timeBuffer[100];
     // Format the time (MM/DD/YYYY, HH:MM:SS AM/PM)
-    std::strftime(timeBuffer, sizeof(timeBuffer), "%m/%d/%Y, %I:%M:%S %p", &localTime);
+    strftime(timeBuffer, sizeof(timeBuffer), "%m/%d/%Y, %I:%M:%S %p", &localTime);
     return timeBuffer;
 }
 
-void ConsoleManager::registerConsole(std::shared_ptr<BaseScreen> screenRef) {
+void ConsoleManager::registerConsole(shared_ptr<BaseScreen> screenRef) {
     this->screenMap[screenRef->getConsoleName()] = screenRef; //it should accept MainScreen and ProcessScreen
     system("cls");
 }
@@ -79,40 +78,62 @@ void ConsoleManager::switchConsole(string consoleName)
     }
 }
 
-//void ConsoleManager::displayProcessList() {
-//    std::cout << "Running processes:" << std::endl;
-//    for (const auto& pair : screenMap) {
-//        std::shared_ptr<Screen> screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
-//
-//        if (screenPtr && !screenPtr->isFinished()) {
-//            std::cout << screenPtr->getProcessName() << " "
-//                << screenPtr->getTimestamp() << " "
-//                << "core:" << screenPtr->getCPUCoreID() << " "
-//                << screenPtr->getCurrentLine() << "/"
-//                << screenPtr->getTotalLine() << std::endl;
-//        }
-//    }
-//
-//    std::cout << "\nFinished processes:" << std::endl;
-//    for (const auto& pair : screenMap) {
-//        std::shared_ptr<Screen> screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
-//
-//        if (screenPtr && screenPtr->isFinished()) {
-//            std::cout << screenPtr->getProcessName() << " "
-//                << screenPtr->getTimestamp() << " "
-//                << "core:" << screenPtr->getCPUCoreID() << " "
-//                << screenPtr->getCurrentLine() << "/"
-//                << screenPtr->getTotalLine() << std::endl;
-//        }
-//    }
-//}
+void ConsoleManager::displayProcessList() {
+    unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
+    Scheduler* scheduler = Scheduler::getInstance();
+    int coresUsed = scheduler->getCoresUsed();
+    int coresAvailable = scheduler->getCoresAvailable();
+	float cpuUtilization = (float)coresUsed / (coresUsed + coresAvailable) * 100;
 
-std::shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
+	cout << "\nCPU Utilization: " << cpuUtilization << "%" << endl;
+    cout << "Cores used: " << coresUsed << endl;
+	cout << "Cores available: " << coresAvailable << endl;
+	cout << "-----------------------------------" << endl;
+    cout << "Running processes:" << endl;
+    for (const auto& pair : screenMap) {
+        shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
+
+        if (screenPtr && !screenPtr->isFinished()) {
+
+            auto coreID = screenPtr->getCPUCoreID();
+            string coreIDstr;
+            if (coreID == -1) {
+                coreIDstr = "N/A";
+            }
+            else {
+                coreIDstr = to_string(coreID);
+            }
+
+            cout << "Name: " << screenPtr->getProcessName() << " | "
+                << screenPtr->getTimestamp() << " | "
+                << "Core: " << coreIDstr << " | "
+                << screenPtr->getCurrentLine() << "/"
+                << screenPtr->getTotalLine() << " | " << endl;
+        }
+    }
+
+    cout << "\nFinished processes:" << endl;
+    for (const auto& pair : screenMap) {
+        shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
+
+        if (screenPtr && screenPtr->isFinished()) {
+            cout << "Name: " << screenPtr->getProcessName() << " | "
+                << screenPtr->getTimestamp() << " | "
+                << "Core: " << screenPtr->getCPUCoreID() << " | "
+                << screenPtr->getCurrentLine() << "/"
+                << screenPtr->getTotalLine() << " | " << endl;
+        }
+    }
+    cout << "-----------------------------------" << endl;
+}
+
+
+shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
 {
     return this->currentConsole;
 }
 
-void ConsoleManager::setCurrentConsole(std::shared_ptr<BaseScreen> screenRef)
+void ConsoleManager::setCurrentConsole(shared_ptr<BaseScreen> screenRef)
 {
     this->currentConsole = screenRef;
 }
@@ -124,13 +145,14 @@ ConsoleManager* ConsoleManager::getInstance()
 
 void ConsoleManager::exitApplication() {
     this->running = false;
+	Scheduler::getInstance()->stop();
 }
 
 bool ConsoleManager::isRunning() {
     return this->running;
 }
 
-std::unordered_map<std::string, std::shared_ptr<BaseScreen>> ConsoleManager::getScreenMap() {
+unordered_map<string, shared_ptr<BaseScreen>> ConsoleManager::getScreenMap() {
     return this->screenMap;
 }
 
