@@ -2,6 +2,7 @@
 #include "BaseScreen.h"
 #include "PrintCommand.h"
 #include <vector>
+#include <fstream>
 
 using namespace std;	
 
@@ -20,6 +21,7 @@ public:
 		FINISHED
 	};
 
+	
 	void setProcessName(string processName);
 	void setCurrentLine(int currentLine);
 	void setTotalLine(int totalLine);
@@ -32,6 +34,8 @@ public:
 	int getCommandCounter() const;
 	int getCPUCoreID() const;
 	void setCPUCoreID(int coreID);
+	void createFile();
+	void viewFile();
 	
 	ProcessState getState() const;
 

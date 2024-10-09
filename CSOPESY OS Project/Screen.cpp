@@ -6,6 +6,7 @@
 #include <iostream>
 #include <thread>
 #include <chrono>
+#include <fstream>
 
 using namespace std;
 
@@ -18,6 +19,7 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
     this->currentLine = currentLine;
     this->totalLine = totalLine;
     this->timestamp = timestamp;
+
 
 	// create 100 print commands
 	for(int i=0; i<totalLine; i++){
@@ -120,5 +122,29 @@ Screen::ProcessState Screen::getState() const
 void Screen::setCPUCoreID(int coreID)
 {
 	this->cpuCoreID = coreID;
+}
+
+void Screen::createFile()
+{
+	string fileName = this->processName + ".txt";
+	fstream file;
+	//create file if it doesnt exit
+	file.open(fileName, std::ios::out | std::ios::trunc);
+	file << "Hello world from "<< this->processName << "!" << std::endl;
+	file.close();
+}
+
+void Screen::viewFile()
+{
+	string fileName = this->processName + ".txt";
+	fstream file;
+	file.open(fileName, std::ios::in);
+	std::string line;
+	while (std::getline(file, line)) {
+		cout << "\"";
+		cout << line;
+		cout << "\"" << endl;
+	}
+	file.close();
 }
 
