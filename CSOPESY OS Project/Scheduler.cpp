@@ -77,6 +77,8 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
         process->setCurrentLine(process->getCurrentLine() + 1);
         process->setCPUCoreID(core);
     }
+	string timestampFinished = ConsoleManager::getInstance()->getCurrentTimestamp();
+	process->setTimestampFinished(timestampFinished);
 }
 
 void Scheduler::addProcessToQueue(std::shared_ptr<Screen> process) {

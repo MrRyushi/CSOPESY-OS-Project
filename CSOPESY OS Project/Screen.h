@@ -24,6 +24,7 @@ public:
 	void setCurrentLine(int currentLine);
 	void setTotalLine(int totalLine);
 	void setTimestamp(string timestamp);
+	void setTimestampFinished(string timestampFinished);
 
 	void executeCurrentCommand();
 	void moveToNextLine();
@@ -31,13 +32,14 @@ public:
 	int getCommandCounter() const;
 	int getCPUCoreID() const;
 	void setCPUCoreID(int coreID);
+	
 	ProcessState getState() const;
 
 	string getProcessName() override;
 	int getCurrentLine() override;
 	int getTotalLine() override;
 	string getTimestamp() override;
-
+	string getTimestampFinished();
 
 
 private:
@@ -47,6 +49,7 @@ private:
 	int commandCounter;
 	int cpuCoreID = -1;
 	string timestamp;
+	string timestampFinished;
 	std::vector<PrintCommand> printCommands;
 	ProcessState currentState;
 

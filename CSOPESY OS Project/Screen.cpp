@@ -78,6 +78,14 @@ string Screen::getTimestamp()
 	return this->timestamp;
 }
 
+string Screen::getTimestampFinished() {
+	return timestampFinished;
+}
+
+void Screen::setTimestampFinished(string timestampFinished) {
+	this->timestampFinished = timestampFinished;
+}
+
 
 void Screen::executeCurrentCommand() 
 {

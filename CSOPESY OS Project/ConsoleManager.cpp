@@ -116,9 +116,10 @@ void ConsoleManager::displayProcessList() {
     for (const auto& pair : screenMap) {
         shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
 
+
         if (screenPtr && screenPtr->isFinished()) {
             cout << "Name: " << screenPtr->getProcessName() << " | "
-                << screenPtr->getTimestamp() << " | "
+                << screenPtr->getTimestampFinished() << " | "
                 << "Finished" << " | "
                 << screenPtr->getCurrentLine() << "/"
                 << screenPtr->getTotalLine() << " | " << endl;
