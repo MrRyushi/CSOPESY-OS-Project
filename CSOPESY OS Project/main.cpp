@@ -22,6 +22,7 @@ using namespace std;
 #include "MainScreen.h"
 #include "Scheduler.h"
 #include <fstream>
+#include <random>
 
 
 
@@ -32,15 +33,38 @@ int main()
 
     Scheduler::initialize(4);
 
-    // create 10 processes each with 100 commands
+    // Creating 10 processes with randomized total line of instructions
     for (int i = 0; i < 10; i++) {
+        // Create a random number generator
+        std::random_device rd;  // Seed
+        std::mt19937 gen(rd()); // Mersenne Twister random number generator
+        std::uniform_int_distribution<> dis(50, 100); // Random distribution between 50 and 100 lines
+
+        // Generate random number of lines between 50 and 100
+        int randLine = dis(gen);
+
         string processName = "Process" + to_string(i);
-        shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, 100, ConsoleManager::getInstance()->getCurrentTimestamp());
+        shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, randLine, ConsoleManager::getInstance()->getCurrentTimestamp());
+
         ConsoleManager::getInstance()->registerConsole(processScreen);
+
         // Cast processScreen to shared_ptr<Screen>
         shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
-		Scheduler::getInstance()->addProcessToQueue(screenPtr);
+
+        // Add the process to the scheduler queue
+        Scheduler::getInstance()->addProcessToQueue(screenPtr);
     }
+
+
+  //  // create 10 processes each with 100 commands
+  //  for (int i = 0; i < 10; i++) {
+  //      string processName = "Process" + to_string(i);
+  //      shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, 100, ConsoleManager::getInstance()->getCurrentTimestamp());
+  //      ConsoleManager::getInstance()->registerConsole(processScreen);
+  //      // Cast processScreen to shared_ptr<Screen>
+  //      shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
+		//Scheduler::getInstance()->addProcessToQueue(screenPtr);
+  //  }
 
     std::thread schedulerThread([&] {
         Scheduler::getInstance()->start();
