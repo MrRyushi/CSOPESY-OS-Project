@@ -16,7 +16,7 @@ public:
     void start();
     void stop();
     void addProcessToQueue(std::shared_ptr<Screen> process);
-	void workerFunction(int core, std::shared_ptr<Screen> process);
+    void workerFunction(int core, std::shared_ptr<Screen> process);
     static Scheduler* getInstance();
     static void initialize(int numCores);
 
@@ -30,7 +30,9 @@ private:
     bool schedulerRunning;
     std::vector<std::thread> workerThreads;
     std::queue<std::shared_ptr<Screen>> processQueue;
-	static Scheduler* scheduler;
+    std::mutex processQueueMutex;
+    std::condition_variable processQueueCondition;
+    static Scheduler* scheduler;
 };
 
 #endif // SCHEDULER_H
