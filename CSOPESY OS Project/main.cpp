@@ -32,6 +32,8 @@ int main()
 
     Scheduler::initialize(4);
 
+    std::ofstream files[10];
+
     // create 10 processes each with 100 commands
     for (int i = 0; i < 10; i++) {
         string processName = "Process" + to_string(i);
@@ -39,7 +41,7 @@ int main()
         ConsoleManager::getInstance()->registerConsole(processScreen);
         // Cast processScreen to shared_ptr<Screen>
         shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
-		Scheduler::getInstance()->addProcessToQueue(screenPtr);
+        Scheduler::getInstance()->addProcessToQueue(screenPtr);
     }
 
     std::thread schedulerThread([&] {

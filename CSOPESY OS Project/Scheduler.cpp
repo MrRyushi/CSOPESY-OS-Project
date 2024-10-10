@@ -4,6 +4,7 @@
 #include <iostream>
 #include <chrono>
 #include <thread>
+#include <fstream>
 
 Scheduler::Scheduler(int numCores) : numCores(numCores), schedulerRunning(false), coresUsed(0), coresAvailable(numCores) {}
 
@@ -72,10 +73,25 @@ void Scheduler::stop() {
 
 void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
     string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
+    std::ofstream file;
+    std::string fileName = "text_files/" + process->getProcessName() + ".txt";
+    file.open(fileName, std::ios::app);
     for (int i = 0; i < process->getTotalLine(); i++) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(80));
+        std::this_thread::sleep_for(std::chrono::milliseconds(5));
         process->setCurrentLine(process->getCurrentLine() + 1);
         process->setCPUCoreID(core);
+
+        file.open(fileName, std::ios::app);
+
+        if (file.is_open()) {
+            
+            file << "Hello from " << process->getProcessName() << std::endl;
+            file << "Timestamp: " << process->getTimestamp() << std::endl;
+            file.close(); // Always close the file after you're done
+        }
+        else {
+            std::cerr << "Failed to open " << fileName << std::endl;
+        }
     }
 	string timestampFinished = ConsoleManager::getInstance()->getCurrentTimestamp();
 	process->setTimestampFinished(timestampFinished);
