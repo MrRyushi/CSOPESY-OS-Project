@@ -42,6 +42,8 @@ int main()
         // Cast processScreen to shared_ptr<Screen>
         shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
         Scheduler::getInstance()->addProcessToQueue(screenPtr);
+        //create files
+        screenPtr->createFile();
     }
 
     std::thread schedulerThread([&] {

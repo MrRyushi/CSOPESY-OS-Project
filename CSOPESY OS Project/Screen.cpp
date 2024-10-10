@@ -130,21 +130,6 @@ void Screen::createFile()
 	fstream file;
 	//create file if it doesnt exit
 	file.open(fileName, std::ios::out | std::ios::trunc);
-	file << "Hello world from "<< this->processName << "!" << std::endl;
-	file.close();
-}
-
-void Screen::viewFile()
-{
-	string fileName = this->processName + ".txt";
-	fstream file;
-	file.open(fileName, std::ios::in);
-	std::string line;
-	while (std::getline(file, line)) {
-		cout << "\"";
-		cout << line;
-		cout << "\"" << endl;
-	}
 	file.close();
 }
 

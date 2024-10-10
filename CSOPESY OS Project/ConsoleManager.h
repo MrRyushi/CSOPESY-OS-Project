@@ -32,7 +32,7 @@ public:
 	bool isRunning();
 	void setCurrentConsole(std::shared_ptr<BaseScreen> screenRef);
 	void displayProcessList();
-	void printProcess(string enteredProcess);
+
 
 
 private:

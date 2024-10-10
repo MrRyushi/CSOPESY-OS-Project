@@ -121,50 +121,11 @@ void ConsoleManager::displayProcessList() {
             cout << "Name: " << screenPtr->getProcessName() << " | "
                 << screenPtr->getTimestampFinished() << " | "
                 << "Finished" << " | "
-                << screenPtr->getCurrentLine() << "/"
+                << screenPtr->getCurrentLine()-1 << "/"
                 << screenPtr->getTotalLine() << " | " << endl;
         }
     }
     cout << "-----------------------------------" << endl;
-}
-
-void ConsoleManager::printProcess(string enteredProcess){
-    unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
-    auto it = screenMap.find(enteredProcess);
-    for (const auto& pair : screenMap) {
-        shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
-
-        //check if process name exits
-        if (screenPtr->getProcessName() == enteredProcess) {
-
-            //check if process is finished
-            if (screenPtr && screenPtr->isFinished()){
-                shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(screenMap.find(enteredProcess)->second);
-
-                auto coreID = screenPtr->getCPUCoreID();
-                string coreIDstr;
-                if (coreID == -1) {
-                    coreIDstr = "N/A";
-                }
-                else {
-                    coreIDstr = to_string(coreID);
-                }
-
-                cout << "Process Name: " << enteredProcess << endl;
-                cout << "Logs:" << endl;
-                cout << "(" << screenPtr->getTimestamp() << ")  "
-                    << "Core: " << coreIDstr << "  ";
-                //where to put createfile?
-                screenPtr->createFile();
-                screenPtr->viewFile();
-            }
-            else {
-                cout << "Process is not yet finished" << endl;
-            }
-            
-        }
-
-    }
 }
 
 

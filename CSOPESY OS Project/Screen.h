@@ -35,7 +35,6 @@ public:
 	int getCPUCoreID() const;
 	void setCPUCoreID(int coreID);
 	void createFile();
-	void viewFile();
 	
 	ProcessState getState() const;
 
