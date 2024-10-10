@@ -77,7 +77,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
     std::string fileName = "text_files/" + process->getProcessName() + ".txt";
     file.open(fileName, std::ios::app);
     for (int i = 0; i < process->getTotalLine(); i++) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(5));
+        std::this_thread::sleep_for(std::chrono::milliseconds(80));
         process->setCurrentLine(process->getCurrentLine() + 1);
         process->setCPUCoreID(core);
 
@@ -86,7 +86,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
         if (file.is_open()) {
             
             file << "Hello from " << process->getProcessName() << std::endl;
-            file << "Timestamp: " << process->getTimestamp() << std::endl;
+            file << "Timestamp: " << ConsoleManager::getInstance()->getCurrentTimestamp() << std::endl;
             file.close(); // Always close the file after you're done
         }
         else {
