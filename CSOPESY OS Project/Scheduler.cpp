@@ -78,18 +78,15 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
     file.open(fileName, std::ios::app);
     file << "Process name: " << process->getProcessName() << std::endl;
     file << "Logs: " << endl << endl;
-    for (int i = -1; i < process->getTotalLine(); i++) {
-        std::this_thread::sleep_for(std::chrono::milliseconds(80));
-        process->setCurrentLine(process->getCurrentLine() + 1);
+    for (int i = 0; i < process->getTotalLine(); i++) {
         process->setCPUCoreID(core);
+        std::this_thread::sleep_for(std::chrono::milliseconds(80));
         string coreIDstr;
         string printed;
         unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
         auto it = screenMap.find(process->getProcessName());
         for (const auto& pair : screenMap) {
-            //shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
-
-            shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(screenMap.find(process->getProcessName())->second);
+        	shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(screenMap.find(process->getProcessName())->second);
             auto coreID = screenPtr->getCPUCoreID();
             
             if (coreID == -1) {
@@ -100,20 +97,17 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
             }
             
         }
-            file.open(fileName, std::ios::app);
-            //string printed = screenPtr->viewFile(); 
             if (file.is_open()) {
-
-                
+                shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(screenMap.find(process->getProcessName())->second);
                 file << "(" << ConsoleManager::getInstance()->getCurrentTimestamp() << ")";
                 file << "  Core: " << coreIDstr;
             	file << " \"Hello world from " << process->getProcessName() << "!\"" <<std::endl;
-                    file.close(); // Always close the file after you're done
             }
             else {
                 std::cerr << "Failed to open " << fileName << std::endl;
             }
-        //}
+            process->setCurrentLine(1 + process->getCurrentLine());
+
     }
     file.close();
 	string timestampFinished = ConsoleManager::getInstance()->getCurrentTimestamp();

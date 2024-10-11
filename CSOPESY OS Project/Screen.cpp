@@ -26,13 +26,6 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
 		this->printCommands.push_back(PrintCommand(i, "Printing from " + processName + " " + std::to_string(i)));
 
 	}
-
-	/*
-	for(int i = 0; i < this->printCommands.size(); i++){
-		this->printCommands[i].execute();
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	}*/
-	
 }
 
 

@@ -121,7 +121,7 @@ void ConsoleManager::displayProcessList() {
             cout << "Name: " << screenPtr->getProcessName() << " | "
                 << screenPtr->getTimestampFinished() << " | "
                 << "Finished" << " | "
-                << screenPtr->getCurrentLine()-1 << "/"
+                << screenPtr->getCurrentLine() << "/"
                 << screenPtr->getTotalLine() << " | " << endl;
         }
     }
