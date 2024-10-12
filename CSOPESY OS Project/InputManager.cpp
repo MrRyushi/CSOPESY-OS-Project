@@ -64,30 +64,53 @@ void InputManager::handleMainConsoleInput()
 
                 cin >> processName;
 
-                string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-                std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
-                ConsoleManager::getInstance()->registerConsole(screenInstance);
+				if (ConsoleManager::getInstance()->getScreenMap().contains(processName)) {
+					cout << "Screen already exists." << endl;
+				}
+                else {
+                    string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
+                    std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
+                    ConsoleManager::getInstance()->registerConsole(screenInstance);
 
-                ConsoleManager::getInstance()->switchConsole(processName);
-                ConsoleManager::getInstance()->drawConsole();
+                    ConsoleManager::getInstance()->switchConsole(processName);
+                    ConsoleManager::getInstance()->drawConsole();
+                }
             }
             else if (screenCommand == "-r") {
                 cin >> processName;
                 ConsoleManager::getInstance()->switchConsole(processName);
                 ConsoleManager::getInstance()->drawConsole();
             }
+            else if (screenCommand == "-ls") {
+				ConsoleManager::getInstance()->displayProcessList();
+			}
+			else {
+				cout << "Command not recognized." << endl;
+			}
         }
+        else if (input == "print") {
+            cout << "Process name: ";
+            string enteredProcess;
+            cin >> enteredProcess;
+            if (enteredProcess.empty()) { // if the process name is empty
+                std::cout << "Command not recognized! Please provide a process name." << std::endl;
+            }
+            ConsoleManager::getInstance()->printProcess(enteredProcess);
+        }
+
+
         else if (input == "exit") {
             ConsoleManager::getInstance()->exitApplication();
-        }
-    }
+		}
+		else {
+			cout << "Command not recognized." << endl;
+		}
+    } 
+
     // screen is at process
     else {
         if (input == "exit") {
             ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);
-        }
-        else {
-            ConsoleManager::getInstance()->drawConsole();
         }
     }
 
