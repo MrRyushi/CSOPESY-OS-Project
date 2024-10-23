@@ -128,6 +128,8 @@ void Scheduler::start() {
     stop();
 }*/
 
+
+
 int Scheduler::getCoresUsed() const {
     return coresUsed;
 }
@@ -168,4 +170,12 @@ Scheduler* Scheduler::getInstance() {
         scheduler = new Scheduler();
     }
     return scheduler;
+}
+
+int Scheduler::getCpuCycles() const {
+	return cpuCycles;
+}
+
+void Scheduler::setCpuCycles(int cpuCycles) {
+	this->cpuCycles = cpuCycles;
 }

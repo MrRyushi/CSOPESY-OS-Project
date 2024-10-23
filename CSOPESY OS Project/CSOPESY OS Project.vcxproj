@@ -149,6 +149,9 @@
     <ClInclude Include="Scheduler.h" />
     <ClInclude Include="Screen.h" />
   </ItemGroup>
+  <ItemGroup>
+    <Text Include="..\..\..\..\Downloads\config.txt" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
   </ImportGroup>

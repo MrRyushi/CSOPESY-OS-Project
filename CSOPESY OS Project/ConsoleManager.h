@@ -27,6 +27,23 @@ public:
 	void registerConsole(std::shared_ptr<BaseScreen> screenRef);
 	void switchConsole(string consoleName);
 	std::shared_ptr<BaseScreen> getCurrentConsole();
+	void setInitialized(bool initialized);
+	bool getInitialized();
+
+	void setNumCpu(int num_cpu);
+	void setSchedulerConfig(string schedulerConfig);
+	void setTimeSlice(int timeSlice);
+	void setMinIns(int minIns);
+	void setMaxIns(int maxIns);
+	void setDelayPerExec(int delayPerExec);
+	void initializeConfiguration();
+
+	int getNumCpu();
+	string getSchedulerConfig();
+	int getTimeSlice();
+	int getMinIns();
+	int getMaxIns();
+	int getDelayPerExec();
 
 	void exitApplication();
 	bool isRunning();
@@ -40,6 +57,13 @@ private:
 	static ConsoleManager* consoleManager;
 	bool running = true;
 	bool switchSuccessful = true;
+	bool initialized = false;
+	int num_cpu = 0;
+	string schedulerConfig = "";
+	int timeSlice = 0;
+	int minIns = 0;
+	int maxIns = 0;
+	int delayPerExec = 0;
 
 	// declare consoles 
 	std::shared_ptr<BaseScreen> currentConsole;

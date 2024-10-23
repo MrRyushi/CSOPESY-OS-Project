@@ -25,8 +25,12 @@ public:
     int coresUsed = 0; // Tracks how many cores are currently used
     int coresAvailable; // Tracks how many cores are available
 
+	int getCpuCycles() const;
+	void setCpuCycles(int cpuCycles);
+
 private:
     int numCores;
+    int cpuCycles = 0;
     bool schedulerRunning;
     std::vector<std::thread> workerThreads;
     std::queue<std::shared_ptr<Screen>> processQueue;

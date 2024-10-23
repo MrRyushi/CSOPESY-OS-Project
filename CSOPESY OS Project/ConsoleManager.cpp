@@ -15,6 +15,54 @@ ConsoleManager::ConsoleManager() {
 
 void ConsoleManager::initialize() {
     consoleManager = new ConsoleManager();
+
+	
+
+	/*consoleManager->scheduler.initialize(num_cpu);
+	consoleManager->scheduler.start();
+	consoleManager->running = true;
+	consoleManager->switchSuccessful = true;
+	consoleManager->initialized = false;
+	consoleManager->currentConsole = nullptr;
+	consoleManager->screenMap = unordered_map<string, shared_ptr<BaseScreen>>();*/
+}
+
+void ConsoleManager::initializeConfiguration() {
+    FILE* file;
+    file = fopen("config.txt", "r");
+    if (file == NULL) {
+        cout << "Error opening file" << endl;
+    }
+    else {
+        char line[256];
+        while (fgets(line, sizeof(line), file)) {
+            string str = line;
+            if (str.find("num_cpu") != string::npos) {
+                string num_cpu_str = str.substr(str.find("=") + 1);
+                ConsoleManager::getInstance()->setNumCpu(stoi(num_cpu_str));
+            }
+            else if (str.find("scheduler") != string::npos) {
+                ConsoleManager::getInstance()->setSchedulerConfig(str.substr(str.find("=") + 1));
+            }
+            else if (str.find("time_slice") != string::npos) {
+                string time_slice_str = str.substr(str.find("=") + 1);
+                ConsoleManager::getInstance()->setTimeSlice(stoi(time_slice_str));
+            }
+            else if (str.find("min_ins") != string::npos) {
+                string min_ins_str = str.substr(str.find("=") + 1);
+                ConsoleManager::getInstance()->setMinIns(stoi(min_ins_str));
+            }
+            else if (str.find("max_ins") != string::npos) {
+                string max_ins_str = str.substr(str.find("=") + 1);
+                ConsoleManager::getInstance()->setMaxIns(stoi(max_ins_str));
+            }
+            else if (str.find("delay_per_exec") != string::npos) {
+                string delay_per_exec_str = str.substr(str.find("=") + 1);
+                ConsoleManager::getInstance()->setDelayPerExec(stoi(delay_per_exec_str));
+            }
+        }
+        fclose(file);
+    }
 }
 
 void ConsoleManager::drawConsole() {
@@ -128,6 +176,55 @@ void ConsoleManager::displayProcessList() {
     cout << "-----------------------------------" << endl;
 }
 
+int ConsoleManager::getNumCpu() {
+	return this->num_cpu;
+}
+
+string ConsoleManager::getSchedulerConfig() {
+	return this->schedulerConfig;
+}
+
+int ConsoleManager::getTimeSlice() {
+	return this->timeSlice;
+}
+
+int ConsoleManager::getMinIns() {
+	return this->minIns;
+}
+
+int ConsoleManager::getMaxIns() {
+	return this->maxIns;
+}
+
+int ConsoleManager::getDelayPerExec() {
+	return this->delayPerExec;
+}
+
+void ConsoleManager::setNumCpu(int num_cpu) {
+	this->num_cpu = num_cpu;
+}
+
+void ConsoleManager::setSchedulerConfig(string scheduler) {
+	this->schedulerConfig = scheduler;
+}
+
+void ConsoleManager::setTimeSlice(int timeSlice) {
+	this->timeSlice = timeSlice;
+}
+
+void ConsoleManager::setMinIns(int minIns) {
+	this->minIns = minIns;
+}
+
+void ConsoleManager::setMaxIns(int maxIns) {
+	this->maxIns = maxIns;
+}
+
+void ConsoleManager::setDelayPerExec(int delayPerExec) {
+	this->delayPerExec = delayPerExec;
+}
+
+
 void ConsoleManager::printProcess(string enteredProcess){
     unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
     auto it = screenMap.find(enteredProcess);
@@ -194,6 +291,14 @@ bool ConsoleManager::isRunning() {
 
 unordered_map<string, shared_ptr<BaseScreen>> ConsoleManager::getScreenMap() {
     return this->screenMap;
+}
+
+void ConsoleManager::setInitialized(bool initialized) {
+	this->initialized = initialized;
+}
+
+bool ConsoleManager::getInitialized() {
+	return this->initialized;
 }
 
 void ConsoleManager::printHeader() {
