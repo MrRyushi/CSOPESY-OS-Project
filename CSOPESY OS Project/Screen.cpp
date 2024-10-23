@@ -7,17 +7,19 @@
 #include <thread>
 #include <chrono>
 #include <fstream>
+#include <random>
+#include "ConsoleManager.h"
 
 using namespace std;
 
 namespace fs = std::filesystem; // alias for convenience
 
-Screen::Screen(string processName, int currentLine, int totalLine, string timestamp)
+Screen::Screen(string processName, int currentLine, string timestamp)
     : BaseScreen(processName), cpuCoreID(-1), commandCounter(0), currentState(ProcessState::READY)
 {
     this->processName = processName;
     this->currentLine = currentLine;
-    this->totalLine = totalLine;
+	this->setRandomIns();
     this->timestamp = timestamp;
 
 
@@ -35,6 +37,12 @@ Screen::Screen(string processName, int currentLine, int totalLine, string timest
 	
 }
 
+void Screen::setRandomIns() {
+	std::random_device rd;
+	std::mt19937 gen(rd()); 
+	std::uniform_int_distribution<> dis(ConsoleManager::getInstance()->getMinIns(), ConsoleManager::getInstance()->getMaxIns()); 
+	this->totalLine = dis(gen);
+}
 
 Screen::~Screen()
 {
@@ -147,4 +155,3 @@ void Screen::viewFile()
 	}
 	file.close();
 }
-

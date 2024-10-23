@@ -10,6 +10,15 @@
 
 class Scheduler {
 public:
+
+    enum ProcessState
+    {
+        READY,
+        RUNNING,
+        WAITING,
+        FINISHED
+    };
+
     Scheduler(int numCores);
     Scheduler();
     ~Scheduler();
@@ -19,6 +28,8 @@ public:
     void workerFunction(int core, std::shared_ptr<Screen> process);
     static Scheduler* getInstance();
     static void initialize(int numCores);
+	bool getSchedulerTestRunning() const;
+	void setSchedulerTestRunning(int schedulerTestRunning);
 
     int getCoresUsed() const;
     int getCoresAvailable() const;
@@ -32,11 +43,13 @@ private:
     int numCores;
     int cpuCycles = 0;
     bool schedulerRunning;
+    bool schedulerTestRunning = false;
     std::vector<std::thread> workerThreads;
     std::queue<std::shared_ptr<Screen>> processQueue;
     std::mutex processQueueMutex;
     std::condition_variable processQueueCondition;
     static Scheduler* scheduler;
+    string algorithm = "";
 };
 
 #endif // SCHEDULER_H

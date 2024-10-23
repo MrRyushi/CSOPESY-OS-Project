@@ -10,7 +10,7 @@ using namespace std;
 class Screen : public BaseScreen
 {
 public:
-	Screen(string processName, int currentLine, int totalLine, string timestamp);
+	Screen(string processName, int currentLine, string timestamp);
 	~Screen();
 
 	enum ProcessState
@@ -28,6 +28,7 @@ public:
 	void setTimestamp(string timestamp);
 	void setTimestampFinished(string timestampFinished);
 
+
 	void executeCurrentCommand();
 	void moveToNextLine();
 	bool isFinished() const;
@@ -36,7 +37,7 @@ public:
 	void setCPUCoreID(int coreID);
 	void createFile();
 	void viewFile();
-	
+	void setRandomIns();
 	ProcessState getState() const;
 
 	string getProcessName() override;

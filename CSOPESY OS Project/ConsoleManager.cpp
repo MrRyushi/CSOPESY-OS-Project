@@ -29,40 +29,51 @@ void ConsoleManager::initialize() {
 
 void ConsoleManager::initializeConfiguration() {
     FILE* file;
-    file = fopen("config.txt", "r");
-    if (file == NULL) {
+    errno_t err = fopen_s(&file, "config.txt", "r");
+    if (err != 0) {
         cout << "Error opening file" << endl;
     }
+
     else {
         char line[256];
         while (fgets(line, sizeof(line), file)) {
             string str = line;
-            if (str.find("num_cpu") != string::npos) {
-                string num_cpu_str = str.substr(str.find("=") + 1);
-                ConsoleManager::getInstance()->setNumCpu(stoi(num_cpu_str));
+            size_t space_pos = str.find(" ");
+
+            if (space_pos == string::npos) continue; // Skip malformed lines
+
+            string key = str.substr(0, space_pos);
+            string value = str.substr(space_pos + 1);
+            value.erase(remove(value.begin(), value.end(), '\n'), value.end()); // Remove newline
+
+            if (key == "num-cpu") {
+                ConsoleManager::getInstance()->setNumCpu(stoi(value));
             }
-            else if (str.find("scheduler") != string::npos) {
-                ConsoleManager::getInstance()->setSchedulerConfig(str.substr(str.find("=") + 1));
+            else if (key == "scheduler") {
+                value.erase(remove(value.begin(), value.end(), '\"'), value.end()); // Remove quotes
+                ConsoleManager::getInstance()->setSchedulerConfig(value);
             }
-            else if (str.find("time_slice") != string::npos) {
-                string time_slice_str = str.substr(str.find("=") + 1);
-                ConsoleManager::getInstance()->setTimeSlice(stoi(time_slice_str));
+            else if (key == "quantum-cycles") {
+                ConsoleManager::getInstance()->setTimeSlice(stoi(value));
             }
-            else if (str.find("min_ins") != string::npos) {
-                string min_ins_str = str.substr(str.find("=") + 1);
-                ConsoleManager::getInstance()->setMinIns(stoi(min_ins_str));
+            else if (key == "min-ins") {
+                ConsoleManager::getInstance()->setMinIns(stoi(value));
             }
-            else if (str.find("max_ins") != string::npos) {
-                string max_ins_str = str.substr(str.find("=") + 1);
-                ConsoleManager::getInstance()->setMaxIns(stoi(max_ins_str));
+            else if (key == "max-ins") {
+                ConsoleManager::getInstance()->setMaxIns(stoi(value));
             }
-            else if (str.find("delay_per_exec") != string::npos) {
-                string delay_per_exec_str = str.substr(str.find("=") + 1);
-                ConsoleManager::getInstance()->setDelayPerExec(stoi(delay_per_exec_str));
+            else if (key == "delay-per-exec") {
+                ConsoleManager::getInstance()->setDelayPerExec(stoi(value));
+            }
+            else if (key == "batch-process-freq") {
+                ConsoleManager::getInstance()->setBatchProcessFrequency(stoi(value));
             }
         }
         fclose(file);
     }
+
+
+	Scheduler* scheduler = Scheduler::getInstance();
 }
 
 void ConsoleManager::drawConsole() {
@@ -106,13 +117,14 @@ string ConsoleManager::getCurrentTimestamp() {
 
 void ConsoleManager::registerConsole(shared_ptr<BaseScreen> screenRef) {
     this->screenMap[screenRef->getConsoleName()] = screenRef; //it should accept MainScreen and ProcessScreen
-    system("cls");
+    //system("cls");
 }
 
 void ConsoleManager::switchConsole(string consoleName)
 {
     if (this->screenMap.contains(consoleName)) {
         this->currentConsole = this->screenMap[consoleName];
+		this->consoleName = consoleName;
 
         if (consoleName == MAIN_CONSOLE) {
             this->drawConsole();
@@ -188,6 +200,10 @@ int ConsoleManager::getTimeSlice() {
 	return this->timeSlice;
 }
 
+int ConsoleManager::getBatchProcessFrequency() {
+	return this->batchProcessFrequency;
+}
+
 int ConsoleManager::getMinIns() {
 	return this->minIns;
 }
@@ -210,6 +226,10 @@ void ConsoleManager::setSchedulerConfig(string scheduler) {
 
 void ConsoleManager::setTimeSlice(int timeSlice) {
 	this->timeSlice = timeSlice;
+}
+
+void ConsoleManager::setBatchProcessFrequency(int batchProcessFrequency) {
+	this->batchProcessFrequency = batchProcessFrequency;
 }
 
 void ConsoleManager::setMinIns(int minIns) {
@@ -264,6 +284,17 @@ void ConsoleManager::printProcess(string enteredProcess){
     }
 }
 
+void ConsoleManager::printProcessSmi() {
+	cout << "Process: " << this->consoleName << endl;
+    if (this->screenMap[consoleName]->getCurrentLine() == this->screenMap[consoleName]->getTotalLine()) {
+		cout << "Finished!" << endl;
+    }
+    else {
+        cout << "Current Line: " << this->screenMap[consoleName]->getCurrentLine() << endl;
+        cout << "Lines of Code: " << this->screenMap[consoleName]->getTotalLine() << endl;
+    }
+	
+}
 
 shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
 {

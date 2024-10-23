@@ -9,6 +9,14 @@ const string MAIN_CONSOLE = "MAIN_CONSOLE";
 class ConsoleManager
 {	
 public:
+	enum ProcessState
+	{
+		READY,
+		RUNNING,
+		WAITING,
+		FINISHED
+	};
+
 	// default constructor
 	ConsoleManager();
 
@@ -33,6 +41,7 @@ public:
 	void setNumCpu(int num_cpu);
 	void setSchedulerConfig(string schedulerConfig);
 	void setTimeSlice(int timeSlice);
+	void setBatchProcessFrequency(int batchProcessFrequency);
 	void setMinIns(int minIns);
 	void setMaxIns(int maxIns);
 	void setDelayPerExec(int delayPerExec);
@@ -41,9 +50,11 @@ public:
 	int getNumCpu();
 	string getSchedulerConfig();
 	int getTimeSlice();
+	int getBatchProcessFrequency();
 	int getMinIns();
 	int getMaxIns();
 	int getDelayPerExec();
+	void printProcessSmi(); 
 
 	void exitApplication();
 	bool isRunning();
@@ -55,12 +66,14 @@ public:
 private:
 	// stores the console manager pointer so that we only instantiate once
 	static ConsoleManager* consoleManager;
+	string consoleName = "";
 	bool running = true;
 	bool switchSuccessful = true;
 	bool initialized = false;
 	int num_cpu = 0;
 	string schedulerConfig = "";
 	int timeSlice = 0;
+	int batchProcessFrequency = 0;
 	int minIns = 0;
 	int maxIns = 0;
 	int delayPerExec = 0;

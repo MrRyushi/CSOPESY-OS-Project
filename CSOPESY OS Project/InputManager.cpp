@@ -45,10 +45,9 @@ void InputManager::handleMainConsoleInput()
 			ConsoleManager::getInstance()->initializeConfiguration();
 
             // start scheduler
-			Scheduler* scheduler = Scheduler::getInstance();
-			scheduler->initialize(ConsoleManager::getInstance()->getNumCpu());
+			Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());
             std::thread schedulerThread([&] {
-                scheduler->start();
+                Scheduler::getInstance()->start();
                 });
             schedulerThread.detach();
 
@@ -56,14 +55,24 @@ void InputManager::handleMainConsoleInput()
         } else if (input == "exit") {
             ConsoleManager::getInstance()->exitApplication();
         } else if (ConsoleManager::getInstance()->getInitialized() == true) {
+            // SCHEDULER TEST 
             if (input == "scheduler-test") {
-                cout << "'scheduler-test' command recognized. Doing something." << endl;
-
-
-
+                if (Scheduler::getInstance()->getSchedulerTestRunning() == false) {
+                    cout << "Scheduler Test now running" << endl;
+                    Scheduler::getInstance()->setSchedulerTestRunning(true);
+				}
+				else {
+					cout << "Scheduler Test already running" << endl;
+				}
             }
             else if (input == "scheduler-stop") {
-                cout << "'scheduler-stop' command recognized. Doing something." << endl;
+                if (Scheduler::getInstance()->getSchedulerTestRunning() == true) {
+                    cout << "Scheduler Test stopped" << endl;
+                    Scheduler::getInstance()->setSchedulerTestRunning(false);
+                }
+				else {
+					cout << "Scheduler Test not running" << endl;
+				}
             }
             else if (input == "report-util") {
                 cout << "'report-util' command recognized. Doing something." << endl;
@@ -85,11 +94,12 @@ void InputManager::handleMainConsoleInput()
                     }
                     else {
                         string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-                        std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
+                        std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 0, timestamp);
                         ConsoleManager::getInstance()->registerConsole(screenInstance);
 
                         ConsoleManager::getInstance()->switchConsole(processName);
                         ConsoleManager::getInstance()->drawConsole();
+						Scheduler::getInstance()->addProcessToQueue(screenInstance);
                     }
                 }
                 else if (screenCommand == "-r") {
@@ -127,6 +137,12 @@ void InputManager::handleMainConsoleInput()
         if (input == "exit") {
             ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);
         }
+		else if (input == "process-smi") {
+            ConsoleManager::getInstance()->printProcessSmi();
+		}
+		else {
+			cout << "Command not recognized." << endl;
+		}
     }
 
     
