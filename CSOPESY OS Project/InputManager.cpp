@@ -28,7 +28,6 @@ InputManager* InputManager::getInstance()
 	return inputManager;
 }
 
-
 void InputManager::handleMainConsoleInput()
 {
 	cout << "Enter a command: ";
@@ -79,6 +78,7 @@ void InputManager::handleMainConsoleInput()
             }
             else if (input == "clear") {
                 system("cls");
+				ConsoleManager::getInstance()->drawConsole();
             }
             else if (input == "screen") {
                 string screenCommand;
