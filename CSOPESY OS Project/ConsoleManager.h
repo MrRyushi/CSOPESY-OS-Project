@@ -3,6 +3,8 @@
 #include <unordered_map>
 #include "Scheduler.h"
 #include <string>
+#include <sstream>
+#include <fstream>
 
 const string MAIN_CONSOLE = "MAIN_CONSOLE";
 
@@ -60,6 +62,7 @@ public:
 	bool isRunning();
 	void setCurrentConsole(std::shared_ptr<BaseScreen> screenRef);
 	void displayProcessList();
+	void reportUtil();
 	void printProcess(string enteredProcess);
 
 
@@ -78,8 +81,10 @@ private:
 	int maxIns = 0;
 	int delayPerExec = 0;
 
+
 	// declare consoles 
 	std::shared_ptr<BaseScreen> currentConsole;
+	std::stringstream logStream;
 	std::unordered_map<string, std::shared_ptr<BaseScreen>> screenMap;
 
 	Scheduler scheduler;
