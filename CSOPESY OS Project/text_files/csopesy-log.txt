@@ -1,0 +1,10 @@
+
+CPU Utilization: 0%
+Cores used: 0
+Cores available: 1
+-----------------------------------
+Running processes:
+
+Finished processes:
+Name: meow | 10/27/2024, 09:56:25 PM | Finished | 1000/1000 | 
+-----------------------------------
