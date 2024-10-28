@@ -31,29 +31,27 @@ int main()
     ConsoleManager::initialize();
 	InputManager::initialize();
 
-    Scheduler::initialize(4);
-
     // Creating 10 processes with randomized total line of instructions
-    for (int i = 0; i < 10; i++) {
-        // Create a random number generator
-        std::random_device rd;  // Seed
-        std::mt19937 gen(rd()); // Mersenne Twister random number generator
-        std::uniform_int_distribution<> dis(50, 100); // Random distribution between 50 and 100 lines
+    //for (int i = 0; i < 10; i++) {
+    //    // Create a random number generator
+    //    std::random_device rd;  // Seed
+    //    std::mt19937 gen(rd()); // Mersenne Twister random number generator
+    //    std::uniform_int_distribution<> dis(50, 100); // Random distribution between 50 and 100 lines
 
-        // Generate random number of lines between 50 and 100
-        int randLine = dis(gen);
+    //    // Generate random number of lines between 50 and 100
+    //    int randLine = dis(gen);
 
-        string processName = "Process" + to_string(i);
-        shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, randLine, ConsoleManager::getInstance()->getCurrentTimestamp());
+    //    string processName = "Process" + to_string(i);
+    //    shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, randLine, ConsoleManager::getInstance()->getCurrentTimestamp());
 
-        ConsoleManager::getInstance()->registerConsole(processScreen);
+    //    ConsoleManager::getInstance()->registerConsole(processScreen);
 
-        // Cast processScreen to shared_ptr<Screen>
-        shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
+    //    // Cast processScreen to shared_ptr<Screen>
+    //    shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
 
-        // Add the process to the scheduler queue
-        Scheduler::getInstance()->addProcessToQueue(screenPtr);
-    }
+    //    // Add the process to the scheduler queue
+    //    Scheduler::getInstance()->addProcessToQueue(screenPtr);
+    //}
 
 
   //  // create 10 processes each with 100 commands
@@ -66,10 +64,10 @@ int main()
 		//Scheduler::getInstance()->addProcessToQueue(screenPtr);
   //  }
 
-    std::thread schedulerThread([&] {
+    /*std::thread schedulerThread([&] {
         Scheduler::getInstance()->start();
         });
-    schedulerThread.detach();
+    schedulerThread.detach();*/
     
     // register main screen
     shared_ptr<BaseScreen> mainScreen = make_shared<MainScreen>(MAIN_CONSOLE);
@@ -80,9 +78,26 @@ int main()
     bool running = true;
     ConsoleManager::getInstance()->drawConsole();
 
+	int cpuCycles = 0;
+
     while (running){
         InputManager::getInstance()->handleMainConsoleInput();
         running = ConsoleManager::getInstance()->isRunning();
+        cpuCycles++;
+        // create batchProcessFrequency number of processes
+        if (Scheduler::getInstance()->getSchedulerTestRunning()) {
+            for (int i = 0; i < ConsoleManager::getInstance()->getBatchProcessFrequency(); i++) {
+                string processName = "cycle" + std::to_string(cpuCycles) + "processName" + std::to_string(i);
+                shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, ConsoleManager::getInstance()->getCurrentTimestamp());
+                shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
+				Scheduler::getInstance()->addProcessToQueue(screenPtr);
+				ConsoleManager::getInstance()->registerConsole(processScreen);
+				//cout << "Process " << processName << " added to queue." << endl;
+
+
+            }
+        }
+
     }
     
 	InputManager::getInstance()->destroy();

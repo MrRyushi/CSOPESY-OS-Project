@@ -5,6 +5,7 @@ using namespace std;
 
 class BaseScreen {
 public:
+
 	BaseScreen(string name);
 	BaseScreen();
 

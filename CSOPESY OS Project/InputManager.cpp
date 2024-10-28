@@ -28,92 +28,136 @@ InputManager* InputManager::getInstance()
 	return inputManager;
 }
 
-
 void InputManager::handleMainConsoleInput()
 {
-	cout << "Enter a command: ";
+    cout << "Enter a command: ";
     string input;
-	cin >> input;
+    getline(cin, input); // Capture entire line input
 
-	for (int i = 0; i < input.length(); i++) {
-		input[i] = tolower(input[i]);
-	}
+    // Convert input to lowercase
+    for (char &c : input) {
+        c = tolower(c);
+    }
 
+    // Split input by spaces
+    istringstream iss(input);
+    vector<string> tokens{istream_iterator<string>{iss}, istream_iterator<string>{}};
+
+    if (tokens.empty()) {
+        cout << "No command entered." << endl;
+        return;
+    }
+
+    string command = tokens[0];
+
+    // Check initialization state once
+    if (!ConsoleManager::getInstance()->getInitialized() && command != "initialize") {
+        cout << "Please initialize the processor configuration first." << endl;
+        return;
+    }
+
+    // Main Console commands
     if (ConsoleManager::getInstance()->getCurrentConsole()->getConsoleName() == MAIN_CONSOLE) {
-        if (input == "initialize") {
-            cout << "'initialize' command recognized. Doing something." << endl;
+        if (command == "initialize") {
+            ConsoleManager::getInstance()->setInitialized(true);
+            ConsoleManager::getInstance()->initializeConfiguration();
+
+            // Start scheduler
+            Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());
+            std::thread schedulerThread([&] {
+                Scheduler::getInstance()->start();
+            });
+            schedulerThread.detach();
+
+            cout << "'Processor Configuration Initialized'" << endl;
         }
-        else if (input == "scheduler-test") {
-            cout << "'scheduler-test' command recognized. Doing something." << endl;
+        else if (command == "exit") {
+            ConsoleManager::getInstance()->exitApplication();
         }
-        else if (input == "scheduler-stop") {
-            cout << "'scheduler-stop' command recognized. Doing something." << endl;
+        else if (command == "scheduler-test") {
+            if (!Scheduler::getInstance()->getSchedulerTestRunning()) {
+                cout << "Scheduler Test now running" << endl;
+                Scheduler::getInstance()->setSchedulerTestRunning(true);
+            }
+            else {
+                cout << "Scheduler Test already running" << endl;
+            }
         }
-        else if (input == "report-util") {
-            cout << "'report-util' command recognized. Doing something." << endl;
+        else if (command == "scheduler-stop") {
+            if (Scheduler::getInstance()->getSchedulerTestRunning()) {
+                cout << "Scheduler Test stopped" << endl;
+                Scheduler::getInstance()->setSchedulerTestRunning(false);
+            }
+            else {
+                cout << "Scheduler Test not running" << endl;
+            }
         }
-        else if (input == "clear") {
+        else if (command == "report-util") {
+            ConsoleManager::getInstance()->reportUtil();
+        }
+        else if (command == "clear") {
             system("cls");
+            ConsoleManager::getInstance()->drawConsole();
         }
-        else if (input == "screen") {
-            string screenCommand;
-            string processName;
-            cin >> screenCommand;
+        else if (command == "screen") {
+            if (tokens.size() > 1) {
+                string screenCommand = tokens[1];
+                string processName = (tokens.size() > 2) ? tokens[2] : "";
 
-            if (screenCommand == "-s") {
+                if (screenCommand == "-s" && !processName.empty()) {
+                    if (ConsoleManager::getInstance()->getScreenMap().contains(processName)) {
+                        cout << "Screen already exists." << endl;
+                    }
+                    else {
+                        string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
+                        auto screenInstance = std::make_shared<Screen>(processName, 0, timestamp);
+                        ConsoleManager::getInstance()->registerConsole(screenInstance);
 
-                cin >> processName;
-
-				if (ConsoleManager::getInstance()->getScreenMap().contains(processName)) {
-					cout << "Screen already exists." << endl;
-				}
-                else {
-                    string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-                    std::shared_ptr<Screen> screenInstance = std::make_shared<Screen>(processName, 1, 10, timestamp);
-                    ConsoleManager::getInstance()->registerConsole(screenInstance);
-
+                        ConsoleManager::getInstance()->switchConsole(processName);
+                        ConsoleManager::getInstance()->drawConsole();
+                        Scheduler::getInstance()->addProcessToQueue(screenInstance);
+                    }
+                }
+                else if (screenCommand == "-r" && !processName.empty()) {
                     ConsoleManager::getInstance()->switchConsole(processName);
                     ConsoleManager::getInstance()->drawConsole();
                 }
+                else if (screenCommand == "-ls") {
+                    ConsoleManager::getInstance()->displayProcessList();
+                }
+                else {
+                    cout << "Command not recognized." << endl;
+                }
             }
-            else if (screenCommand == "-r") {
-                cin >> processName;
-                ConsoleManager::getInstance()->switchConsole(processName);
-                ConsoleManager::getInstance()->drawConsole();
+            else {
+                cout << "Command not recognized." << endl;
             }
-            else if (screenCommand == "-ls") {
-				ConsoleManager::getInstance()->displayProcessList();
-			}
-			else {
-				cout << "Command not recognized." << endl;
-			}
         }
-        else if (input == "print") {
+        else if (command == "print") {
             cout << "Process name: ";
             string enteredProcess;
             cin >> enteredProcess;
-            if (enteredProcess.empty()) { // if the process name is empty
-                std::cout << "Command not recognized! Please provide a process name." << std::endl;
+            if (enteredProcess.empty()) {
+                cout << "Command not recognized! Please provide a process name." << endl;
             }
             ConsoleManager::getInstance()->printProcess(enteredProcess);
         }
-
-
-        else if (input == "exit") {
-            ConsoleManager::getInstance()->exitApplication();
-		}
-		else {
-			cout << "Command not recognized." << endl;
-		}
-    } 
-
-    // screen is at process
-    else {
-        if (input == "exit") {
-            ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);
+        else {
+            cout << "Command not recognized." << endl;
         }
     }
-
-    
+    else {
+        // Process-specific commands
+        if (command == "exit") {
+            ConsoleManager::getInstance()->switchConsole(MAIN_CONSOLE);
+        }
+        else if (command == "process-smi") {
+            ConsoleManager::getInstance()->printProcessSmi();
+        }
+        else {
+            cout << "Command not recognized." << endl;
+        }
+    }
 }
+
     

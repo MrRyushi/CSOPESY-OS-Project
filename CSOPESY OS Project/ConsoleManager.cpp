@@ -15,6 +15,65 @@ ConsoleManager::ConsoleManager() {
 
 void ConsoleManager::initialize() {
     consoleManager = new ConsoleManager();
+
+	
+
+	/*consoleManager->scheduler.initialize(num_cpu);
+	consoleManager->scheduler.start();
+	consoleManager->running = true;
+	consoleManager->switchSuccessful = true;
+	consoleManager->initialized = false;
+	consoleManager->currentConsole = nullptr;
+	consoleManager->screenMap = unordered_map<string, shared_ptr<BaseScreen>>();*/
+}
+
+void ConsoleManager::initializeConfiguration() {
+    FILE* file;
+    errno_t err = fopen_s(&file, "config.txt", "r");
+    if (err != 0) {
+        cout << "Error opening file" << endl;
+    }
+
+    else {
+        char line[256];
+        while (fgets(line, sizeof(line), file)) {
+            string str = line;
+            size_t space_pos = str.find(" ");
+
+            if (space_pos == string::npos) continue; // Skip malformed lines
+
+            string key = str.substr(0, space_pos);
+            string value = str.substr(space_pos + 1);
+            value.erase(remove(value.begin(), value.end(), '\n'), value.end()); // Remove newline
+
+            if (key == "num-cpu") {
+                ConsoleManager::getInstance()->setNumCpu(stoi(value));
+            }
+            else if (key == "scheduler") {
+                value.erase(remove(value.begin(), value.end(), '\"'), value.end()); // Remove quotes
+                ConsoleManager::getInstance()->setSchedulerConfig(value);
+            }
+            else if (key == "quantum-cycles") {
+                ConsoleManager::getInstance()->setTimeSlice(stoi(value));
+            }
+            else if (key == "min-ins") {
+                ConsoleManager::getInstance()->setMinIns(stoi(value));
+            }
+            else if (key == "max-ins") {
+                ConsoleManager::getInstance()->setMaxIns(stoi(value));
+            }
+            else if (key == "delay-per-exec") {
+                ConsoleManager::getInstance()->setDelayPerExec(stoi(value));
+            }
+            else if (key == "batch-process-freq") {
+                ConsoleManager::getInstance()->setBatchProcessFrequency(stoi(value));
+            }
+        }
+        fclose(file);
+    }
+
+
+	Scheduler* scheduler = Scheduler::getInstance();
 }
 
 void ConsoleManager::drawConsole() {
@@ -58,13 +117,14 @@ string ConsoleManager::getCurrentTimestamp() {
 
 void ConsoleManager::registerConsole(shared_ptr<BaseScreen> screenRef) {
     this->screenMap[screenRef->getConsoleName()] = screenRef; //it should accept MainScreen and ProcessScreen
-    system("cls");
+    //system("cls");
 }
 
 void ConsoleManager::switchConsole(string consoleName)
 {
     if (this->screenMap.contains(consoleName)) {
         this->currentConsole = this->screenMap[consoleName];
+		this->consoleName = consoleName;
 
         if (consoleName == MAIN_CONSOLE) {
             this->drawConsole();
@@ -83,12 +143,12 @@ void ConsoleManager::displayProcessList() {
     Scheduler* scheduler = Scheduler::getInstance();
     int coresUsed = scheduler->getCoresUsed();
     int coresAvailable = scheduler->getCoresAvailable();
-	float cpuUtilization = (float)coresUsed / (coresUsed + coresAvailable) * 100;
+    float cpuUtilization = (float)coresUsed / (coresUsed + coresAvailable) * 100;
 
-	cout << "\nCPU Utilization: " << cpuUtilization << "%" << endl;
+    cout << "\nCPU Utilization: " << cpuUtilization << "%" << endl;
     cout << "Cores used: " << coresUsed << endl;
-	cout << "Cores available: " << coresAvailable << endl;
-	cout << "-----------------------------------" << endl;
+    cout << "Cores available: " << coresAvailable << endl;
+    cout << "-----------------------------------" << endl;
     cout << "Running processes:" << endl;
     for (const auto& pair : screenMap) {
         shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
@@ -127,6 +187,123 @@ void ConsoleManager::displayProcessList() {
     }
     cout << "-----------------------------------" << endl;
 }
+
+void ConsoleManager::reportUtil() {
+    std::ostringstream logStream;
+    unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
+    Scheduler* scheduler = Scheduler::getInstance();
+    int coresUsed = scheduler->getCoresUsed();
+    int coresAvailable = scheduler->getCoresAvailable();
+    float cpuUtilization = static_cast<float>(coresUsed) / (coresUsed + coresAvailable) * 100;
+
+    // Log CPU utilization and core details
+    logStream << "\nCPU Utilization: " << cpuUtilization << "%" << std::endl;
+    logStream << "Cores used: " << coresUsed << std::endl;
+    logStream << "Cores available: " << coresAvailable << std::endl;
+    logStream << "-----------------------------------" << std::endl;
+    logStream << "Running processes:" << std::endl;
+
+    // Log details of running processes
+    for (const auto& pair : screenMap) {
+        auto screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
+        if (screenPtr && !screenPtr->isFinished()) {
+            auto coreID = screenPtr->getCPUCoreID();
+            std::string coreIDstr = (coreID == -1) ? "N/A" : std::to_string(coreID);
+
+            logStream << "Name: " << screenPtr->getProcessName() << " | "
+                << screenPtr->getTimestamp() << " | "
+                << "Core: " << coreIDstr << " | "
+                << screenPtr->getCurrentLine() << "/"
+                << screenPtr->getTotalLine() << " | " << std::endl;
+        }
+    }
+
+    logStream << "\nFinished processes:" << std::endl;
+
+    // Log details of finished processes
+    for (const auto& pair : screenMap) {
+        auto screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
+        if (screenPtr && screenPtr->isFinished()) {
+            logStream << "Name: " << screenPtr->getProcessName() << " | "
+                << screenPtr->getTimestampFinished() << " | "
+                << "Finished" << " | "
+                << screenPtr->getCurrentLine() << "/"
+                << screenPtr->getTotalLine() << " | " << std::endl;
+        }
+    }
+
+    logStream << "-----------------------------------" << std::endl;
+
+    // Write the log data to a file
+    std::ofstream file("text_files/csopesy-log.txt", std::ios::out);
+    if (file.is_open()) {
+        file << logStream.str(); // Write log contents to file
+        file.close();
+        std::cout << "Report generated at text_files/csopesy-log.txt" << std::endl;
+    }
+    else {
+        std::cerr << "Error: Could not open file for writing." << std::endl;
+    }
+}
+
+
+
+int ConsoleManager::getNumCpu() {
+	return this->num_cpu;
+}
+
+string ConsoleManager::getSchedulerConfig() {
+	return this->schedulerConfig;
+}
+
+int ConsoleManager::getTimeSlice() {
+	return this->timeSlice;
+}
+
+int ConsoleManager::getBatchProcessFrequency() {
+	return this->batchProcessFrequency;
+}
+
+int ConsoleManager::getMinIns() {
+	return this->minIns;
+}
+
+int ConsoleManager::getMaxIns() {
+	return this->maxIns;
+}
+
+int ConsoleManager::getDelayPerExec() {
+	return this->delayPerExec;
+}
+
+void ConsoleManager::setNumCpu(int num_cpu) {
+	this->num_cpu = num_cpu;
+}
+
+void ConsoleManager::setSchedulerConfig(string scheduler) {
+	this->schedulerConfig = scheduler;
+}
+
+void ConsoleManager::setTimeSlice(int timeSlice) {
+	this->timeSlice = timeSlice;
+}
+
+void ConsoleManager::setBatchProcessFrequency(int batchProcessFrequency) {
+	this->batchProcessFrequency = batchProcessFrequency;
+}
+
+void ConsoleManager::setMinIns(int minIns) {
+	this->minIns = minIns;
+}
+
+void ConsoleManager::setMaxIns(int maxIns) {
+	this->maxIns = maxIns;
+}
+
+void ConsoleManager::setDelayPerExec(int delayPerExec) {
+	this->delayPerExec = delayPerExec;
+}
+
 
 void ConsoleManager::printProcess(string enteredProcess){
     unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
@@ -167,6 +344,17 @@ void ConsoleManager::printProcess(string enteredProcess){
     }
 }
 
+void ConsoleManager::printProcessSmi() {
+	cout << "Process: " << this->consoleName << endl;
+    if (this->screenMap[consoleName]->getCurrentLine() == this->screenMap[consoleName]->getTotalLine()) {
+		cout << "Finished!" << endl;
+    }
+    else {
+        cout << "Current Line: " << this->screenMap[consoleName]->getCurrentLine() << endl;
+        cout << "Lines of Code: " << this->screenMap[consoleName]->getTotalLine() << endl;
+    }
+	
+}
 
 shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
 {
@@ -194,6 +382,14 @@ bool ConsoleManager::isRunning() {
 
 unordered_map<string, shared_ptr<BaseScreen>> ConsoleManager::getScreenMap() {
     return this->screenMap;
+}
+
+void ConsoleManager::setInitialized(bool initialized) {
+	this->initialized = initialized;
+}
+
+bool ConsoleManager::getInitialized() {
+	return this->initialized;
 }
 
 void ConsoleManager::printHeader() {
