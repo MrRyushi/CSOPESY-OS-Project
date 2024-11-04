@@ -57,6 +57,7 @@ public:
 	int getMaxIns();
 	int getDelayPerExec();
 	void printProcessSmi(); 
+	int getCpuCycles();
 
 	void exitApplication();
 	bool isRunning();
@@ -64,6 +65,7 @@ public:
 	void displayProcessList();
 	void reportUtil();
 	void printProcess(string enteredProcess);
+	void schedulerTest();
 
 
 private:
@@ -80,6 +82,7 @@ private:
 	int minIns = 0;
 	int maxIns = 0;
 	int delayPerExec = 0;
+	int cpuCycles = 0;
 
 
 	// declare consoles 

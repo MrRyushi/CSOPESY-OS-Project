@@ -119,28 +119,42 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
     if (algorithm == "fcfs") {
         // First-Come, First-Served logic
         for (int i = 0; i < process->getTotalLine(); i++) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(ConsoleManager::getInstance()->getDelayPerExec()));
+            if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
+                for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                }
+            }
+            else {
+				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+            }
             process->setCurrentLine(process->getCurrentLine() + 1);
         }
     }
+	
     else if (algorithm == "rr") {
-        // Round-Robin logic
-        int quantum = ConsoleManager::getInstance()->getTimeSlice();  // Get RR time slice
-        int processedLines = 0;
+       // Round-Robin logic
+       int quantum = ConsoleManager::getInstance()->getTimeSlice();  // Get RR time slice
 
-        // Process for the duration of the quantum or until the process is finished
-        for (int i = 0; i < quantum && process->getCurrentLine() < process->getTotalLine(); i++) {
-            std::this_thread::sleep_for(std::chrono::milliseconds(ConsoleManager::getInstance()->getDelayPerExec()));
-            process->setCurrentLine(process->getCurrentLine() + 1);
-            processedLines++;
-        }
+       // Process for the duration of the quantum or until the process is finished
+       for (int i = 0; i < quantum && process->getCurrentLine() < process->getTotalLine(); i++) {
+           if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
+               for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
+                   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+               }
+           }
+		   else {
+			   std::this_thread::sleep_for(std::chrono::milliseconds(500));
+           }
+           process->setCurrentLine(process->getCurrentLine() + 1);
 
-        // If process is not finished, re-queue it but retain its core affinity
-        if (process->getCurrentLine() < process->getTotalLine()) {
-            std::lock_guard<std::mutex> lock(processQueueMutex);
-            processQueue.push(process);  // Re-queue the unfinished process
-            processQueueCondition.notify_one();
-        }
+       }
+
+       // If process is not finished, re-queue it but retain its core affinity
+       if (process->getCurrentLine() < process->getTotalLine()) {
+           std::lock_guard<std::mutex> lock(processQueueMutex);
+           processQueue.push(process);  // Re-queue the unfinished process
+           processQueueCondition.notify_one();
+       }
     }
 
     string timestampFinished = ConsoleManager::getInstance()->getCurrentTimestamp();
