@@ -121,11 +121,11 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
         for (int i = 0; i < process->getTotalLine(); i++) {
             if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
                 for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
-                    std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
             }
             else {
-				std::this_thread::sleep_for(std::chrono::milliseconds(500));
+				std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             process->setCurrentLine(process->getCurrentLine() + 1);
         }
@@ -139,11 +139,11 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
        for (int i = 0; i < quantum && process->getCurrentLine() < process->getTotalLine(); i++) {
            if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
                for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
-                   std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+                   std::this_thread::sleep_for(std::chrono::milliseconds(100));
                }
            }
 		   else {
-			   std::this_thread::sleep_for(std::chrono::milliseconds(500));
+			   std::this_thread::sleep_for(std::chrono::milliseconds(100));
            }
            process->setCurrentLine(process->getCurrentLine() + 1);
 
