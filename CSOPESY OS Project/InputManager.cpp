@@ -78,6 +78,12 @@ void InputManager::handleMainConsoleInput()
             if (!Scheduler::getInstance()->getSchedulerTestRunning()) {
                 cout << "Scheduler Test now running" << endl;
                 Scheduler::getInstance()->setSchedulerTestRunning(true);
+                // create batchProcessFrequency number of processes
+                std::thread schedulerTestThread([&] {
+					ConsoleManager::getInstance()->schedulerTest();
+                    });
+                schedulerTestThread.detach();
+               
             }
             else {
                 cout << "Scheduler Test already running" << endl;
