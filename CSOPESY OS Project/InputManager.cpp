@@ -133,15 +133,6 @@ void InputManager::handleMainConsoleInput()
                 cout << "Command not recognized." << endl;
             }
         }
-        else if (command == "print") {
-            cout << "Process name: ";
-            string enteredProcess;
-            cin >> enteredProcess;
-            if (enteredProcess.empty()) {
-                cout << "Command not recognized! Please provide a process name." << endl;
-            }
-            ConsoleManager::getInstance()->printProcess(enteredProcess);
-        }
         else {
             cout << "Command not recognized." << endl;
         }
