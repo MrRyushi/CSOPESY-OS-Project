@@ -67,7 +67,17 @@ void ConsoleManager::initializeConfiguration() {
             }
             else if (key == "batch-process-freq") {
                 ConsoleManager::getInstance()->setBatchProcessFrequency(stoi(value));
+            } 
+            else if (key == "max-overall-mem") {
+				ConsoleManager::getInstance()->setMaxOverallMem(stoi(value));
             }
+            else if (key == "mem-per-frame") {
+                ConsoleManager::getInstance()->setMemPerFrame(stoi(value));
+            }
+            else if (key == "mem-per-proc") {
+                ConsoleManager::getInstance()->setMemPerProc(stoi(value));
+            }
+           
         }
         fclose(file);
     }
@@ -80,7 +90,7 @@ void ConsoleManager::schedulerTest() {
     while (Scheduler::getInstance()->getSchedulerTestRunning()) {
         for (int i = 0; i < ConsoleManager::getInstance()->getBatchProcessFrequency(); i++) {
             string processName = "cycle" + std::to_string(ConsoleManager::getInstance()->cpuCycles) + "processName" + std::to_string(i);
-            shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, ConsoleManager::getInstance()->getCurrentTimestamp());
+            shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, ConsoleManager::getInstance()->getCurrentTimestamp(), ConsoleManager::getInstance()->getMemPerProc());
             shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
             Scheduler::getInstance()->addProcessToQueue(screenPtr);
             ConsoleManager::getInstance()->registerConsole(processScreen);
@@ -410,6 +420,30 @@ void ConsoleManager::setInitialized(bool initialized) {
 
 bool ConsoleManager::getInitialized() {
 	return this->initialized;
+}
+
+void ConsoleManager::setMaxOverallMem(size_t maxOverallMem) {
+	this->maxOverallMem = maxOverallMem;
+}
+
+void ConsoleManager::setMemPerFrame(size_t memPerFrame) {
+	this->memPerFrame = memPerFrame;
+}
+
+void ConsoleManager::setMemPerProc(size_t memPerProc) {
+	this->memPerProc = memPerProc;
+}
+
+size_t ConsoleManager::getMaxOverallMem() {
+	return this->maxOverallMem;
+}
+
+size_t ConsoleManager::getMemPerFrame() {
+	return this->memPerFrame;
+}
+
+size_t ConsoleManager::getMemPerProc() {
+	return this->memPerProc;
 }
 
 void ConsoleManager::printHeader() {

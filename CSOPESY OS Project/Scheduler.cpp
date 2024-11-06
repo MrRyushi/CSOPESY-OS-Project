@@ -1,6 +1,7 @@
 #include "Scheduler.h"
 #include "ConsoleManager.h"
 #include "Screen.h"
+#include "FlatMemoryAllocator.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -39,9 +40,10 @@ void Scheduler::start() {
             while (schedulerRunning) {
                 if (!processQueue.empty()) {
                     std::shared_ptr<Screen> process;
-
-                    // Lock the queue for popping the next process
-                    {
+                   
+                    
+                   
+                   {
                         std::unique_lock<std::mutex> lock(processQueueMutex);
                         // Wait for a process to be added to the queue
                         processQueueCondition.wait(lock, [this]() { return !processQueue.empty() || !schedulerRunning; });
@@ -53,22 +55,36 @@ void Scheduler::start() {
                         // Pop the next process from the queue
                         process = processQueue.front();
                         processQueue.pop();
+                      
+                        
                         coresUsed++;  // Increment cores used
                         coresAvailable--;  // Decrement available cores
-                    }
 
-                    // Set the core ID for the process being processed
-                    process->setCPUCoreID(i); // Assign the core ID to the process
 
-                    // Process the worker function
-                    workerFunction(i, process);
 
-                    // After processing, update cores used and available
-                    {
-                        std::lock_guard<std::mutex> lock(processQueueMutex);
-                        coresUsed--;  // Decrement cores used
-                        coresAvailable++;  // Increment available cores
-                    }
+                        // Set the core ID for the process being processed
+                        process->setCPUCoreID(i); // Assign the core ID to the process
+
+                        // Process the worker function
+                        void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired());
+						cout << FlatMemoryAllocator::getInstance()->visualizeMemory() << endl;
+                        if (memoryPtr != nullptr) {
+                            workerFunction(i, process, memoryPtr);
+                        } else { 
+                            addProcessToQueue(process);
+                        }
+                        
+
+                        // After processing, update cores used and available
+                        {
+                            std::lock_guard<std::mutex> lock(processQueueMutex);
+                            coresUsed--;  // Decrement cores used
+                            coresAvailable++;  // Increment available cores
+                        }
+                   }
+
+                   //
+         
                 }
 
             }
@@ -82,7 +98,7 @@ void Scheduler::start() {
         }
     }
     std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    cout << "scheduler stopped\n" << endl;
+    std::cout << "scheduler stopped\n" << endl;
 
     stop();
 }
@@ -103,7 +119,7 @@ void Scheduler::stop() {
     processQueueCondition.notify_all();  // Wake up all threads
 }
 
-void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
+void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* memoryPtr) {
     string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
 
     // Ensure the process keeps its original core for FCFS and RR
@@ -146,10 +162,21 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
 			   std::this_thread::sleep_for(std::chrono::milliseconds(100));
            }
            process->setCurrentLine(process->getCurrentLine() + 1);
-
        }
 
-       // If process is not finished, re-queue it but retain its core affinity
+       // deallocate 
+       FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);
+
+        // produce text file 
+        /* 
+        Timestamp:
+        Number of processes in memory:
+        Total external fragmentation in KB:
+
+        ----end--- 
+        
+        */
+        //if process is not finished, re-queue it but retain its core affinity
        if (process->getCurrentLine() < process->getTotalLine()) {
            std::lock_guard<std::mutex> lock(processQueueMutex);
            processQueue.push(process);  // Re-queue the unfinished process
