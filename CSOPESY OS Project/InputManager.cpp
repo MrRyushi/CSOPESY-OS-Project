@@ -3,6 +3,7 @@ using namespace std;
 #include "InputManager.h"
 #include <iostream>
 #include "ConsoleManager.h"
+#include "FlatMemoryAllocator.h"
 #include "Screen.h"
 
 InputManager::InputManager()
@@ -104,6 +105,9 @@ void InputManager::handleMainConsoleInput()
         else if (command == "clear") {
             system("cls");
             ConsoleManager::getInstance()->drawConsole();
+        }
+        else if (command == "memory") {
+			FlatMemoryAllocator::getInstance()->printMemoryInfo();
         }
         else if (command == "screen") {
             if (tokens.size() > 1) {

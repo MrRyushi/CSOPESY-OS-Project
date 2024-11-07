@@ -60,21 +60,20 @@ void Scheduler::start() {
 
                     }
 
-                   // Process the worker function
-                   void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired());
-                   cout << FlatMemoryAllocator::getInstance()->visualizeMemory() << endl;
-                   if (memoryPtr != nullptr) {
-                       // Set the core ID for the process being processed
-                       process->setCPUCoreID(i); // Assign the core ID to the process
-                       workerFunction(i, process, memoryPtr);
+                    void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName());
+                   
+                    if (memoryPtr != nullptr) {
+                        // Set the core ID for the process being processed
+                        process->setCPUCoreID(i); // Assign the core ID to the process
+                        workerFunction(i, process, memoryPtr);
 
-                       // After processing, update cores used and available
-                       {
-                           std::lock_guard<std::mutex> lock(processQueueMutex);
-                           coresUsed--;  // Decrement cores used
-                           coresAvailable++;  // Increment available cores
-                       }
-                   }
+                        // After processing, update cores used and available
+                        {
+                            std::lock_guard<std::mutex> lock(processQueueMutex);
+                            coresUsed--;  // Decrement cores used
+                            coresAvailable++;  // Increment available cores
+                        }
+                    }
                    else {
                        // Add process to the ready queue if memory is allocated
                        addProcessToQueue(process);
@@ -89,7 +88,7 @@ void Scheduler::start() {
                 }
 
             }
-            });
+        });
     }
 
     // Wait for all worker threads to finish
@@ -165,18 +164,12 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
            process->setCurrentLine(process->getCurrentLine() + 1);
        }
 
+       FlatMemoryAllocator::getInstance()->printMemoryInfo();
+
        // deallocate 
        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);
 
-        // produce text file 
-        /* 
-        Timestamp:
-        Number of processes in memory:
-        Total external fragmentation in KB:
 
-        ----end--- 
-        
-        */
         //if process is not finished, re-queue it but retain its core affinity
        if (process->getCurrentLine() < process->getTotalLine()) {
            std::lock_guard<std::mutex> lock(processQueueMutex);
