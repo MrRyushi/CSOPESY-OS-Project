@@ -57,7 +57,10 @@ bool FlatMemoryAllocator:: canAllocateAt(size_t index, size_t size) {
 }
 
 void FlatMemoryAllocator::allocateAt(size_t index, size_t size) {
-	std::fill(&allocationMap.begin() + index, &allocationMap.begin() + index + size, true);
+	// Fill allocation map with true values starting from index until the process size
+	for (size_t i = index; i < index + size; ++i) {
+		allocationMap[i] = true; 
+	}
 	allocatedSize += size;
 }
 

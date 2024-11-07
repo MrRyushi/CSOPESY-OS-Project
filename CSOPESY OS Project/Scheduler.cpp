@@ -40,10 +40,8 @@ void Scheduler::start() {
             while (schedulerRunning) {
                 if (!processQueue.empty()) {
                     std::shared_ptr<Screen> process;
-                   
-                    
-                   
-                   {
+
+                    {
                         std::unique_lock<std::mutex> lock(processQueueMutex);
                         // Wait for a process to be added to the queue
                         processQueueCondition.wait(lock, [this]() { return !processQueue.empty() || !schedulerRunning; });
@@ -55,36 +53,39 @@ void Scheduler::start() {
                         // Pop the next process from the queue
                         process = processQueue.front();
                         processQueue.pop();
-                      
-                        
+
+
                         coresUsed++;  // Increment cores used
                         coresAvailable--;  // Decrement available cores
 
+                    }
 
+                   // Process the worker function
+                   void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired());
+                   cout << FlatMemoryAllocator::getInstance()->visualizeMemory() << endl;
+                   if (memoryPtr != nullptr) {
+                       // Set the core ID for the process being processed
+                       process->setCPUCoreID(i); // Assign the core ID to the process
+                       workerFunction(i, process, memoryPtr);
 
-                        // Set the core ID for the process being processed
-                        process->setCPUCoreID(i); // Assign the core ID to the process
+                       // After processing, update cores used and available
+                       {
+                           std::lock_guard<std::mutex> lock(processQueueMutex);
+                           coresUsed--;  // Decrement cores used
+                           coresAvailable++;  // Increment available cores
+                       }
+                   }
+                   else {
+                       // Add process to the ready queue if memory is allocated
+                       addProcessToQueue(process);
 
-                        // Process the worker function
-                        void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired());
-						cout << FlatMemoryAllocator::getInstance()->visualizeMemory() << endl;
-                        if (memoryPtr != nullptr) {
-                            workerFunction(i, process, memoryPtr);
-                        } else { 
-                            addProcessToQueue(process);
-                        }
-                        
-
-                        // After processing, update cores used and available
-                        {
-                            std::lock_guard<std::mutex> lock(processQueueMutex);
-                            coresUsed--;  // Decrement cores used
-                            coresAvailable++;  // Increment available cores
-                        }
+                       {
+                           std::lock_guard<std::mutex> lock(processQueueMutex);
+                           coresUsed--;  // Decrement cores used
+                           coresAvailable++;  // Increment available cores
+                       }
                    }
 
-                   //
-         
                 }
 
             }
