@@ -43,6 +43,7 @@ private:
     int numCores;
     int cpuCycles = 0;
     bool schedulerRunning;
+	int activeThreads;
     bool schedulerTestRunning = false;
     std::vector<std::thread> workerThreads;
     std::queue<std::shared_ptr<Screen>> processQueue;
