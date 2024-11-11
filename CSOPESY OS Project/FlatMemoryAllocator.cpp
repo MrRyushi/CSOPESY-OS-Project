@@ -107,11 +107,11 @@ void FlatMemoryAllocator::deallocateAt(size_t index) {
 }
 
 void FlatMemoryAllocator::printMemoryInfo() {
-	static int callCounter = 0;  // Counter for unique file naming
-	callCounter++;
+	static int curr_quantum_cycle = 0;  // Counter for unique file naming
+	curr_quantum_cycle++;
 
 	// Create a unique filename for each call
-	std::string filename = "memory_visualization_" + std::to_string(callCounter) + ".txt";
+	std::string filename = "memory_stamp_" + std::to_string(curr_quantum_cycle) + ".txt";
 	std::ofstream outFile(filename);  // Open a uniquely named file for writing
 
 	if (!outFile) {  // Check if the file was successfully opened
