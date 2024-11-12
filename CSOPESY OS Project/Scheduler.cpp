@@ -143,7 +143,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
            process->setCurrentLine(process->getCurrentLine() + 1);
        }
 
-       FlatMemoryAllocator::getInstance()->printMemoryInfo();
+       FlatMemoryAllocator::getInstance()->printMemoryInfo(quantum);
 
        // deallocate 
        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);

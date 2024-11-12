@@ -106,9 +106,9 @@ void FlatMemoryAllocator::deallocateAt(size_t index) {
 	allocatedSize -= size;
 }
 
-void FlatMemoryAllocator::printMemoryInfo() {
+void FlatMemoryAllocator::printMemoryInfo(int quantum_size) {
 	static int curr_quantum_cycle = 0;  // Counter for unique file naming
-	curr_quantum_cycle++;
+	curr_quantum_cycle = curr_quantum_cycle + quantum_size;
 
 	// Create a unique filename for each call
 	std::string filename = "memory_stamp_" + std::to_string(curr_quantum_cycle) + ".txt";

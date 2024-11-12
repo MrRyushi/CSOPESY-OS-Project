@@ -107,7 +107,7 @@ void InputManager::handleMainConsoleInput()
             ConsoleManager::getInstance()->drawConsole();
         }
         else if (command == "memory") {
-			FlatMemoryAllocator::getInstance()->printMemoryInfo();
+			FlatMemoryAllocator::getInstance()->printMemoryInfo(ConsoleManager::getInstance()->getTimeSlice());
         }
         else if (command == "screen") {
             if (tokens.size() > 1) {

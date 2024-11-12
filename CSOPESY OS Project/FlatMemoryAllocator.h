@@ -23,7 +23,7 @@ public:
 	static void initialize(size_t maximumMemorySize);
     FlatMemoryAllocator() : maximumSize(0), allocatedSize(0) {};
 
-	void printMemoryInfo();
+	void printMemoryInfo(int quantum);
 	size_t calculateExternalFragmentation();
 	size_t getNumberOfProcessesInMemory();
 
