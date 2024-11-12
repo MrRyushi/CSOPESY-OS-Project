@@ -54,6 +54,9 @@ void Scheduler::start() {
 
                 void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName());
                 if (memoryPtr) {
+                    coresAvailable--;
+                    coresUsed++;
+
                     process->setCPUCoreID(i);
                     workerFunction(i, process, memoryPtr);
                 }
@@ -69,6 +72,9 @@ void Scheduler::start() {
                         schedulerRunning = false;
                         processQueueCondition.notify_all();
                     }
+
+                    coresUsed--;
+                    coresAvailable++;
                 }
             }
             }).detach(); // Detach thread for independent execution

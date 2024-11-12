@@ -87,17 +87,23 @@ void ConsoleManager::initializeConfiguration() {
 }
 
 void ConsoleManager::schedulerTest() {
+    static int process_counter = 0;
+    process_counter++;
+
     while (Scheduler::getInstance()->getSchedulerTestRunning()) {
         for (int i = 0; i < ConsoleManager::getInstance()->getBatchProcessFrequency(); i++) {
-            string processName = "cycle" + std::to_string(ConsoleManager::getInstance()->cpuCycles) + "processName" + std::to_string(i);
+           /* string processName = "cycle" + std::to_string(ConsoleManager::getInstance()->cpuCycles) + "processName" + std::to_string(i);*/
+            string processName = "P" + std::to_string(process_counter);
             shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, ConsoleManager::getInstance()->getCurrentTimestamp(), ConsoleManager::getInstance()->getMemPerProc());
             shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
             Scheduler::getInstance()->addProcessToQueue(screenPtr);
             ConsoleManager::getInstance()->registerConsole(processScreen);
             ConsoleManager::getInstance()->cpuCycles++;
-            //cout << "Process " << processName << " added to queue." << endl;
+            
 
         }
+        process_counter++;
+
 		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
     }
 }
