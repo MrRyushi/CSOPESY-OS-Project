@@ -1,6 +1,7 @@
 #include "Scheduler.h"
 #include "ConsoleManager.h"
 #include "Screen.h"
+#include "FlatMemoryAllocator.h"
 #include <iostream>
 #include <chrono>
 #include <thread>
@@ -11,7 +12,8 @@
 
 Scheduler::Scheduler(int numCores)
     : numCores(numCores), schedulerRunning(false),
-    coresUsed(0), coresAvailable(numCores),
+    coresUsed(0), coresAvailable(numCores), 
+    activeThreads(0),
     processQueueMutex(), processQueueCondition() {}
 
 Scheduler* Scheduler::scheduler = nullptr;
@@ -33,58 +35,50 @@ void Scheduler::start() {
     schedulerRunning = true;
     algorithm = ConsoleManager::getInstance()->getSchedulerConfig();
 
-    std::vector<std::thread> workerThreads(numCores);
     for (int i = 0; i < numCores; i++) {
-        workerThreads[i] = std::thread([this, i]() {
+        // Launch each core on a separate detached thread
+        std::thread([this, i]() {
             while (schedulerRunning) {
-                if (!processQueue.empty()) {
-                    std::shared_ptr<Screen> process;
+                std::shared_ptr<Screen> process;
 
-                    // Lock the queue for popping the next process
-                    {
-                        std::unique_lock<std::mutex> lock(processQueueMutex);
-                        // Wait for a process to be added to the queue
-                        processQueueCondition.wait(lock, [this]() { return !processQueue.empty() || !schedulerRunning; });
+                {
+                    std::unique_lock<std::mutex> lock(processQueueMutex);
+                    processQueueCondition.wait(lock, [this]() { return !processQueue.empty() || !schedulerRunning; });
 
-                        if (!schedulerRunning) {
-                            return; // Exit thread if the scheduler is stopping
-                        }
+                    if (!schedulerRunning) return;
 
-                        // Pop the next process from the queue
-                        process = processQueue.front();
-                        processQueue.pop();
-                        coresUsed++;  // Increment cores used
-                        coresAvailable--;  // Decrement available cores
-                    }
-
-                    // Set the core ID for the process being processed
-                    process->setCPUCoreID(i); // Assign the core ID to the process
-
-                    // Process the worker function
-                    workerFunction(i, process);
-
-                    // After processing, update cores used and available
-                    {
-                        std::lock_guard<std::mutex> lock(processQueueMutex);
-                        coresUsed--;  // Decrement cores used
-                        coresAvailable++;  // Increment available cores
-                    }
+                    process = processQueue.front();
+                    processQueue.pop();
+                    ++activeThreads; // Increment active thread count
                 }
 
+                void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName());
+                if (memoryPtr) {
+                    coresAvailable--;
+                    coresUsed++;
+
+                    process->setCPUCoreID(i);
+                    workerFunction(i, process, memoryPtr);
+                }
+                else {
+                    addProcessToQueue(process);
+                }
+
+                // Update core tracking after process completion
+                {
+                    std::lock_guard<std::mutex> lock(processQueueMutex);
+                    --activeThreads; // Decrement active thread count
+                    if (processQueue.empty() && activeThreads == 0) {
+                        schedulerRunning = false;
+                        processQueueCondition.notify_all();
+                    }
+
+                    coresUsed--;
+                    coresAvailable++;
+                }
             }
-            });
+            }).detach(); // Detach thread for independent execution
     }
-
-    // Wait for all worker threads to finish
-    for (auto& thread : workerThreads) {
-        if (thread.joinable()) {
-            thread.join();
-        }
-    }
-    std::this_thread::sleep_for(std::chrono::milliseconds(500));
-    cout << "scheduler stopped\n" << endl;
-
-    stop();
 }
 
 int Scheduler::getCoresUsed() const {
@@ -98,12 +92,12 @@ int Scheduler::getCoresAvailable() const {
 void Scheduler::stop() {
     {
         std::lock_guard<std::mutex> lock(processQueueMutex);
-        schedulerRunning = false;  // Set scheduler running to false
+        schedulerRunning = false;
     }
-    processQueueCondition.notify_all();  // Wake up all threads
+    processQueueCondition.notify_all();
 }
 
-void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
+void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* memoryPtr) {
     string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
 
     // Ensure the process keeps its original core for FCFS and RR
@@ -129,6 +123,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
             }
             process->setCurrentLine(process->getCurrentLine() + 1);
         }
+        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);
     }
 	
     else if (algorithm == "rr") {
@@ -146,10 +141,15 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process) {
 			   std::this_thread::sleep_for(std::chrono::milliseconds(100));
            }
            process->setCurrentLine(process->getCurrentLine() + 1);
-
        }
 
-       // If process is not finished, re-queue it but retain its core affinity
+       FlatMemoryAllocator::getInstance()->printMemoryInfo(quantum);
+
+       // deallocate 
+       FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);
+
+
+        //if process is not finished, re-queue it but retain its core affinity
        if (process->getCurrentLine() < process->getTotalLine()) {
            std::lock_guard<std::mutex> lock(processQueueMutex);
            processQueue.push(process);  // Re-queue the unfinished process

@@ -130,6 +130,7 @@
   <ItemGroup>
     <ClCompile Include="BaseScreen.cpp" />
     <ClCompile Include="ConsoleManager.cpp" />
+    <ClCompile Include="FlatMemoryAllocator.cpp" />
     <ClCompile Include="ICommand.cpp" />
     <ClCompile Include="InputManager.cpp" />
     <ClCompile Include="main.cpp" />
@@ -142,6 +143,7 @@
     <ClInclude Include="BaseScreen.h" />
     <ClInclude Include="ConsoleManager.h" />
     <ClInclude Include="ConsoleTable.h" />
+    <ClInclude Include="FlatMemoryAllocator.h" />
     <ClInclude Include="ICommand.h" />
     <ClInclude Include="InputManager.h" />
     <ClInclude Include="MainScreen.h" />
