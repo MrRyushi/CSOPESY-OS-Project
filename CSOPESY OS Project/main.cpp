@@ -24,6 +24,7 @@ using namespace std;
 #include "FlatMemoryAllocator.h"
 #include <fstream>
 #include <random>
+#include "PagingAllocator.h"
 
 
 
@@ -42,6 +43,7 @@ int main()
 
     const size_t maximumMemorySize = 16384;
     FlatMemoryAllocator::initialize(maximumMemorySize);
+    PagingAllocator::initialize(maximumMemorySize);
 
     while (running){
         InputManager::getInstance()->handleMainConsoleInput();

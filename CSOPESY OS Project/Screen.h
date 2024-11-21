@@ -28,6 +28,7 @@ public:
 	void setTimestamp(string timestamp);
 	void setTimestampFinished(string timestampFinished);
 	void setMemoryRequired(size_t memoryRequired);
+	void setNumPages(size_t numPages);
 
 
 	void executeCurrentCommand();
@@ -48,6 +49,7 @@ public:
 	int getTotalLine() override;
 	string getTimestamp() override;
 	string getTimestampFinished();
+	size_t getNumPages();
 
 private:
 	string processName;
@@ -55,6 +57,7 @@ private:
 	int totalLine;
 	int commandCounter;
 	int cpuCoreID = -1;
+	size_t numPages;
 	string timestamp;
 	string timestampFinished;
 	std::vector<PrintCommand> printCommands;

@@ -23,6 +23,8 @@ Screen::Screen(string processName, int currentLine, string timestamp, size_t mem
 	this->memoryRequired = memoryRequired;
     this->timestamp = timestamp;
 
+	this->numPages = 4; // TODO: set this in constructor
+
 
 	// create 100 print commands
 	for(int i=0; i<totalLine; i++){
@@ -91,6 +93,16 @@ string Screen::getTimestamp()
 
 string Screen::getTimestampFinished() {
 	return timestampFinished;
+}
+
+size_t Screen::getNumPages()
+{
+	return this->numPages;
+}
+
+void Screen::setNumPages(size_t numPages)
+{
+	this->numPages = numPages;
 }
 
 void Screen::setTimestampFinished(string timestampFinished) {

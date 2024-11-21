@@ -8,6 +8,7 @@
 #include <condition_variable>
 #include <mutex>
 #include <vector>
+#include "PagingAllocator.h"
 
 
 Scheduler::Scheduler(int numCores)
@@ -100,6 +101,7 @@ void Scheduler::stop() {
 void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* memoryPtr) {
     string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
 
+
     // Ensure the process keeps its original core for FCFS and RR
     if (process->getCPUCoreID() == -1) {
         // If core is not yet assigned, set the current core as the affinity core
@@ -109,6 +111,17 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
         // Otherwise, ensure the process stays on its assigned core
         core = process->getCPUCoreID();
     }
+
+    // Allocate Memory Frames 
+    void* allocatedMemory = PagingAllocator::getInstance()->allocate(process);
+    if (!allocatedMemory) {
+        std::cerr << "Process " << process->getProcessName()
+            << " cannot proceed. Insufficient memory. \n";
+
+        addProcessToQueue(process);
+        return;
+    }
+
 
     if (algorithm == "fcfs") {
         // First-Come, First-Served logic
@@ -156,6 +169,9 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
            processQueueCondition.notify_one();
        }
     }
+
+    // Deallocate frames after execution 
+    PagingAllocator::getInstance()->deallocate(process);
 
     string timestampFinished = ConsoleManager::getInstance()->getCurrentTimestamp();
     process->setTimestampFinished(timestampFinished);  // Log completion time
