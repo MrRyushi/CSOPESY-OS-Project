@@ -68,6 +68,11 @@ void Screen::setTimestamp(string timestamp)
 	this->timestamp = timestamp;
 }
 
+void Screen::setNumPages(size_t numPages)
+{
+	this->numPages = numPages;
+}
+
 string Screen::getProcessName()
 {
 	return this->processName;
@@ -90,6 +95,11 @@ string Screen::getTimestamp()
 
 string Screen::getTimestampFinished() {
 	return timestampFinished;
+}
+
+size_t Screen::getNumPages()
+{
+	return this->numPages;
 }
 
 void Screen::setTimestampFinished(string timestampFinished) {
