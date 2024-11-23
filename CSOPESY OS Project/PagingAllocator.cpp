@@ -38,6 +38,9 @@ void* PagingAllocator::allocate(std::shared_ptr<Screen> process) {
 	}
 
 	size_t frameIndex = allocateFrames(numFramesNeeded, processId);
+	process->setMemoryUsage(PagingAllocator::getInstance()->getProcessMemoryUsage(process->getProcessName()));
+	process->setIsRunning(true);
+	processMemoryMap[process->getProcessName()] += process->getMemoryRequired();
 	return reinterpret_cast<void*>(frameIndex);
 }
 
@@ -54,6 +57,15 @@ void PagingAllocator::deallocate(std::shared_ptr<Screen> process) {
 		deallocateFrames(1, frameIndex);
 		it = std::find_if(frameMap.begin(), frameMap.end(),
 			[processName](const auto& entry) { return entry.second == processName; });
+		// Deduct from process memory usage
+		if (processMemoryMap.find(process->getProcessName()) != processMemoryMap.end()) {
+			processMemoryMap[process->getProcessName()] -= process->getMemoryRequired();
+			if (processMemoryMap[process->getProcessName()] == 0) {
+				processMemoryMap.erase(process->getProcessName());  // Clean up zero usage
+			}
+		}
+		process->setIsRunning(false);
+
 	}
 }
 
@@ -100,4 +112,11 @@ void PagingAllocator::deallocateFrames(size_t numFrames, size_t frameIndex) {
 	for (size_t i = 0; i < numFrames; ++i) {
 		freeFrameList.push_back(frameIndex + i);
 	}
+}
+
+size_t PagingAllocator::getProcessMemoryUsage(const std::string& processName) {
+	if (processMemoryMap.find(processName) != processMemoryMap.end()) {
+		return processMemoryMap.at(processName);
+	}
+	return 0;  // Process not found
 }

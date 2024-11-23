@@ -34,6 +34,25 @@ Screen::Screen(string processName, int currentLine, string timestamp, size_t mem
 	
 }
 
+void Screen::setMemoryUsage(size_t memoryUsage)
+{
+	this->memoryUsage = memoryUsage;
+}
+
+size_t Screen::getMemoryUsage() const
+{
+	return this->memoryUsage;
+}
+
+void Screen::setIsRunning(bool isRunning)
+{
+	this->isRunning = isRunning;
+}
+
+bool Screen::getIsRunning() const
+{
+	return this->isRunning;
+}
 
 void Screen::setRandomIns() {
 	std::random_device rd;

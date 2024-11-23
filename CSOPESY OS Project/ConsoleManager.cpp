@@ -391,19 +391,29 @@ void ConsoleManager::printProcessSmi() {
     Scheduler* scheduler = Scheduler::getInstance();
     int coresUsed = scheduler->getCoresUsed();
     int coresAvailable = scheduler->getCoresAvailable();
-    float cpuUtilization = (float)coresUsed / (coresUsed + coresAvailable) * 100;
+    float cpuUtilization = static_cast<float>(coresUsed) / (coresUsed + coresAvailable) * 100;
 
     cout << "--------------------------------------------------" << endl;
-	cout << "|    PROCESS-SMI V01.00 Driver Version 01.00      |" << endl;
+    cout << "|    PROCESS-SMI V01.00 Driver Version 01.00      |" << endl;
     cout << "--------------------------------------------------" << endl;
-	cout << "CPU-UTil: " << cpuUtilization << "%" << endl;
+    cout << "CPU Utilization: " << cpuUtilization << "%" << endl;
     getMemoryUsage();
 
-	cout << "===================================================" << endl;
-	cout << "Running processes and memory usage:" << endl;
-	cout << "---------------------------------------------------" << endl;
+    cout << "===================================================" << endl;
+    cout << "Running processes and memory usage:" << endl;
+    cout << "---------------------------------------------------" << endl;
 
+    // Iterate through screenMap to get running processes and their memory usage
+    for (const auto& pair : screenMap) {
+        auto screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
+        if (screenPtr && !screenPtr->isFinished() && screenPtr->getIsRunning()) {  // Only show running processes
+            size_t memoryUsage = screenPtr->getMemoryUsage();  // Assume this function exists
+            cout << "Process: " << screenPtr->getProcessName()
+                << " | Memory: " << memoryUsage << " KB" << endl;
+        }
+    }
 
+	cout << "===================================================" << endl << endl;
 }
 
 void ConsoleManager::getMemoryUsage() {

@@ -40,6 +40,10 @@ public:
 	void viewFile();
 	void setRandomIns();
 	size_t getMemoryRequired() const;
+	void setMemoryUsage(size_t memoryUsage);
+	size_t getMemoryUsage() const;
+	void setIsRunning(bool isRunning);
+	bool getIsRunning() const;
 
 	ProcessState getState() const;
 
@@ -58,9 +62,11 @@ private:
 	int cpuCoreID = -1;
 	size_t numPages;
 	string timestamp;
+	bool isRunning = false;
 	string timestampFinished;
 	std::vector<PrintCommand> printCommands;
 	ProcessState currentState;
 	size_t memoryRequired;
+	size_t memoryUsage;
 
 };

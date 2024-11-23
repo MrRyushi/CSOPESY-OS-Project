@@ -61,16 +61,22 @@ void InputManager::handleMainConsoleInput()
     // Main Console commands
     if (ConsoleManager::getInstance()->getCurrentConsole()->getConsoleName() == MAIN_CONSOLE) {
         if (command == "initialize") {
-            ConsoleManager::getInstance()->setInitialized(true);
+            if (!ConsoleManager::getInstance()->getInitialized()) {
+                ConsoleManager::getInstance()->setInitialized(true);
 
-            // Start scheduler
-            Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());
-            std::thread schedulerThread([&] {
-                Scheduler::getInstance()->start();
-            });
-            schedulerThread.detach();
+                // Start scheduler
+                Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());
+                std::thread schedulerThread([&] {
+                    Scheduler::getInstance()->start();
+                    });
+                schedulerThread.detach();
 
-            cout << "'Processor Configuration Initialized'" << endl;
+                cout << "'Processor Configuration Initialized'" << endl;
+            }
+            else {
+				cout << "Processor Configuration already initialized." << endl;
+
+            }
         }
         else if (command == "exit") {
             ConsoleManager::getInstance()->exitApplication();

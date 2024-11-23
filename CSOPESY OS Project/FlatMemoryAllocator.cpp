@@ -30,7 +30,7 @@ FlatMemoryAllocator* FlatMemoryAllocator::getInstance() {
 
 std::mutex allocationMapMutex;  // Mutex for protecting allocationMap
 
-void* FlatMemoryAllocator::allocate(size_t size, string process) {
+void* FlatMemoryAllocator::allocate(size_t size, string processName, std::shared_ptr<Screen> process) {
 	{
 		std::lock_guard<std::mutex> lock(allocationMapMutex);  // Lock to ensure thread safety
 
@@ -41,7 +41,9 @@ void* FlatMemoryAllocator::allocate(size_t size, string process) {
 				if (canAllocateAt(i, size)) {
 					// Ensure that the requested block doesn't go out of bounds
 					if (i + size <= maximumSize) {
-						allocateAt(i, size, process);
+						allocateAt(i, size, processName);
+						process->setMemoryUsage(FlatMemoryAllocator::getInstance()->getProcessMemoryUsage(processName));
+						process->setIsRunning(true);
 						return &memory[i];  // Return pointer to allocated memory
 					}
 				}
@@ -54,11 +56,12 @@ void* FlatMemoryAllocator::allocate(size_t size, string process) {
 
 
 
-void FlatMemoryAllocator::deallocate(void* ptr) {
+void FlatMemoryAllocator::deallocate(void* ptr, std::shared_ptr<Screen> process) {
 	std::lock_guard<std::mutex> lock(allocationMapMutex);
 	size_t index = static_cast<char*>(ptr) - &memory[0];
 	if (allocationMap[index] != "") {
-		deallocateAt(index);
+		deallocateAt(index, process);
+		process->setIsRunning(false);
 	}
 }
 
@@ -78,6 +81,14 @@ void FlatMemoryAllocator::visualizeMemoryASCII() {
 
 }
 
+size_t FlatMemoryAllocator::getProcessMemoryUsage(const std::string& processName) const {
+	if (processMemoryMap.find(processName) != processMemoryMap.end()) {
+		return processMemoryMap.at(processName);
+	}
+	return 0;  // Process not found
+}
+
+
 
 
 void FlatMemoryAllocator::initializeMemory() {
@@ -96,20 +107,29 @@ bool FlatMemoryAllocator:: canAllocateAt(size_t index, size_t size) {
 	return (index + size <= maximumSize);
 }
 
-void FlatMemoryAllocator::allocateAt(size_t index, size_t size, string process) {
+void FlatMemoryAllocator::allocateAt(size_t index, size_t size, string processName) {
 	// Fill allocation map with true values starting from index until the process size
 	for (size_t i = index; i < index + size; ++i) {
-		allocationMap[i] = process; 
+		allocationMap[i] = processName; 
 	}
 	allocatedSize += size;
+	processMemoryMap[processName] += size;
 }
 
-void FlatMemoryAllocator::deallocateAt(size_t index) {
+void FlatMemoryAllocator::deallocateAt(size_t index, std::shared_ptr<Screen> process){
 	size_t size = ConsoleManager::getInstance()->getMinMemPerProc();
 	for (size_t i = index; i < index + size && i < maximumSize; ++i) {
 		allocationMap[i]  = "";
 	}
 	allocatedSize -= size;
+
+	// Deduct from process memory usage
+	if (processMemoryMap.find(process->getProcessName()) != processMemoryMap.end()) {
+		processMemoryMap[process->getProcessName()] -= size;
+		if (processMemoryMap[process->getProcessName()] == 0) {
+			processMemoryMap.erase(process->getProcessName());  // Clean up zero usage
+		}
+	}
 }
 
 void FlatMemoryAllocator::printMemoryInfo(int quantum_size) {

@@ -35,7 +35,6 @@ Scheduler::Scheduler() {
 void Scheduler::start() {
     schedulerRunning = true;
     algorithm = ConsoleManager::getInstance()->getSchedulerConfig();
-	cout << "Scheduler algorithm: " << algorithm << endl;
     for (int i = 0; i < numCores; i++) {
         // Launch each core on a separate detached thread
         std::thread([this, i]() {
@@ -53,19 +52,17 @@ void Scheduler::start() {
                     ++activeThreads; // Increment active thread count
                 }
 				void* memoryPtr = nullptr;
-				
+			
 				if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
-                    memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName());
+                    memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName(), process);
 				}
                 else {
 					memoryPtr = PagingAllocator::getInstance()->allocate(process);
                 }
 
-                cout << (memoryPtr == nullptr) << endl;
                 if (memoryPtr) {
                     coresAvailable--;
                     coresUsed++;
-
                     process->setCPUCoreID(i);
                     workerFunction(i, process, memoryPtr);
                 }
@@ -80,10 +77,9 @@ void Scheduler::start() {
                     if (processQueue.empty() && activeThreads == 0) {
                         schedulerRunning = false;
                         processQueueCondition.notify_all();
+                        coresUsed--;
+                        coresAvailable++;
                     }
-
-                    coresUsed--;
-                    coresAvailable++;
                 }
             }
             }).detach(); // Detach thread for independent execution
@@ -144,7 +140,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
             }
             process->setCurrentLine(process->getCurrentLine() + 1);
         }
-        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);
+        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
     }
 	
     else if (algorithm == "rr") {
@@ -169,7 +165,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
 
 
        // deallocate 
-       FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);
+       FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
 
 
         //if process is not finished, re-queue it but retain its core affinity
