@@ -52,8 +52,16 @@ void Scheduler::start() {
                     processQueue.pop();
                     ++activeThreads; // Increment active thread count
                 }
+				void* memoryPtr = nullptr;
+				
+				if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+                    memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName());
+				}
+                else {
+					memoryPtr = PagingAllocator::getInstance()->allocate(process);
+                }
 
-                void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName());
+                cout << (memoryPtr == nullptr) << endl;
                 if (memoryPtr) {
                     coresAvailable--;
                     coresUsed++;
@@ -156,7 +164,9 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
            process->setCurrentLine(process->getCurrentLine() + 1);
        }
 
-       FlatMemoryAllocator::getInstance()->printMemoryInfo(quantum);
+      
+       //FlatMemoryAllocator::getInstance()->printMemoryInfo(quantum);
+
 
        // deallocate 
        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr);

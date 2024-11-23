@@ -15,6 +15,7 @@ public:
 	void* allocate(std::shared_ptr<Screen> process);
 	void deallocate(std::shared_ptr<Screen> process);
 	void visualizeMemory();
+
 private:
 	static PagingAllocator* pagingAllocator;
 	std::map<size_t, std::string> frameMap; // Maps frame index to process name

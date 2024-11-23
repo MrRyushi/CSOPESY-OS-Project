@@ -23,8 +23,7 @@ Screen::Screen(string processName, int currentLine, string timestamp, size_t mem
 	this->memoryRequired = memoryRequired;
     this->timestamp = timestamp;
 
-	this->numPages = 4; // TODO: set this in constructor
-
+	this->numPages = ConsoleManager::getInstance()->getNumPages();
 
 	// create 100 print commands
 	for(int i=0; i<totalLine; i++){
@@ -32,13 +31,9 @@ Screen::Screen(string processName, int currentLine, string timestamp, size_t mem
 
 	}
 
-	/*
-	for(int i = 0; i < this->printCommands.size(); i++){
-		this->printCommands[i].execute();
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	}*/
 	
 }
+
 
 void Screen::setRandomIns() {
 	std::random_device rd;

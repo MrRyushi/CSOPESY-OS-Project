@@ -1,4 +1,5 @@
 #include "PagingAllocator.h"
+#include "ConsoleManager.h"
 #include "Screen.h"
 
 #include <map>
@@ -8,9 +9,14 @@
 #include <algorithm>
 #include <iostream> 
 
-PagingAllocator::PagingAllocator(size_t maxMemorySize)
+PagingAllocator::PagingAllocator(size_t maxMemorySize) : maxMemorySize(maxMemorySize), numFrames(maxMemorySize)
 {
 	this->maxMemorySize = maxMemorySize;
+
+	// Initialize free frame list
+	for (size_t i = 0; i < numFrames; ++i) {
+		freeFrameList.push_back(i);
+	}
 }
 
 PagingAllocator* PagingAllocator::pagingAllocator = nullptr;
@@ -53,7 +59,27 @@ void PagingAllocator::deallocate(std::shared_ptr<Screen> process) {
 
 void PagingAllocator::visualizeMemory()
 {
+	size_t usedFrames = 0; // Counter for allocated frames
+	size_t totalMemory = maxMemorySize; // Maximum overall memory
+
+	// Iterate through frameMap to count allocated frames
+	for (const auto& frame : frameMap)
+	{
+		if (!frame.second.empty()) // Check if the frame is in use
+		{
+			++usedFrames;
+		}
+	}
+
+	// Calculate memory usage
+	cout << usedFrames << " frames used" << endl;
+	size_t usedMemory = usedFrames * ConsoleManager::getInstance()->getMemPerFrame();
+
+	// Display memory usage
+	std::cout << "Memory Usage: " << usedMemory << " / " << totalMemory << " bytes" << std::endl;
 }
+
+
 
 size_t PagingAllocator::allocateFrames(size_t numFrames, string processName) {
 	size_t frameIndex = freeFrameList.back();

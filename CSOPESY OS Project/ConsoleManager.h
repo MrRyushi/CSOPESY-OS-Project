@@ -51,7 +51,8 @@ public:
 
 	void setMaxOverallMem(size_t maxOverallMem);
 	void setMemPerFrame(size_t memPerFrame);
-	void setMemPerProc(size_t memPerProc);
+	void setMinMemPerProc(size_t minMemPerProc);
+	void setMaxMemPerProc(size_t maxMemPerProc);
 
 	int getNumCpu();
 	string getSchedulerConfig();
@@ -64,8 +65,13 @@ public:
 	int getCpuCycles();
 	size_t getMaxOverallMem();
 	size_t getMemPerFrame();
-	size_t getMemPerProc();
+	size_t getMinMemPerProc();
+	size_t getMaxMemPerProc();
 
+	void setNumPages();
+	int getNumPages();
+
+	void getMemoryUsage();
 	void exitApplication();
 	bool isRunning();
 	void setCurrentConsole(std::shared_ptr<BaseScreen> screenRef);
@@ -92,7 +98,9 @@ private:
 	int cpuCycles = 0;
 	size_t maxOverallMem = 0;
 	size_t memPerFrame = 0;
-	size_t memPerProc = 0;
+	size_t minMemPerProc = 0;
+	size_t maxMemPerProc = 0;
+	int numPages = 0;
 
 
 	// declare consoles 

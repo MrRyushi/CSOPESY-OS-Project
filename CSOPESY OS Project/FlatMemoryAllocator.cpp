@@ -62,9 +62,15 @@ void FlatMemoryAllocator::deallocate(void* ptr) {
 	}
 }
 
-std::string FlatMemoryAllocator:: visualizeMemory(){
-	return std::string(memory.begin(), memory.end());
+std::string FlatMemoryAllocator::visualizeMemory()
+{
+	// Calculate the memory usage as a string
+	std::string memoryUsage = std::to_string(allocatedSize) + " / " + std::to_string(maximumSize);
+
+	// Return the memory usage
+	return memoryUsage;
 }
+
 
 void FlatMemoryAllocator::visualizeMemoryASCII() {
 	
@@ -99,7 +105,7 @@ void FlatMemoryAllocator::allocateAt(size_t index, size_t size, string process) 
 }
 
 void FlatMemoryAllocator::deallocateAt(size_t index) {
-	size_t size = ConsoleManager::getInstance()->getMemPerProc();
+	size_t size = ConsoleManager::getInstance()->getMinMemPerProc();
 	for (size_t i = index; i < index + size && i < maximumSize; ++i) {
 		allocationMap[i]  = "";
 	}
@@ -179,7 +185,7 @@ size_t FlatMemoryAllocator::getNumberOfProcessesInMemory() {
 		}
 	}
 		// Calculate the number of processes
-		size_t processSizeInBlocks = ConsoleManager::getInstance()->getMemPerProc();  // Number of blocks per process
+		size_t processSizeInBlocks = ConsoleManager::getInstance()->getMinMemPerProc();  // Number of blocks per process
 	return allocatedBlocks / processSizeInBlocks;  // Total number of processes in memory
 }
 

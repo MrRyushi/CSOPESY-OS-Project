@@ -41,9 +41,6 @@ int main()
     bool running = true;
     ConsoleManager::getInstance()->drawConsole();
 
-    const size_t maximumMemorySize = 16384;
-    FlatMemoryAllocator::initialize(maximumMemorySize);
-    PagingAllocator::initialize(maximumMemorySize);
 
     while (running){
         InputManager::getInstance()->handleMainConsoleInput();

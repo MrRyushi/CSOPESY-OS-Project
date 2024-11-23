@@ -30,7 +30,6 @@ public:
 	void setMemoryRequired(size_t memoryRequired);
 	void setNumPages(size_t numPages);
 
-
 	void executeCurrentCommand();
 	void moveToNextLine();
 	bool isFinished() const;

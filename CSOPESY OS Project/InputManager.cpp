@@ -4,6 +4,7 @@ using namespace std;
 #include <iostream>
 #include "ConsoleManager.h"
 #include "FlatMemoryAllocator.h"
+#include "PagingAllocator.h"
 #include "Screen.h"
 
 InputManager::InputManager()
@@ -63,6 +64,9 @@ void InputManager::handleMainConsoleInput()
             ConsoleManager::getInstance()->setInitialized(true);
             ConsoleManager::getInstance()->initializeConfiguration();
 
+            FlatMemoryAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
+            PagingAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
+
             // Start scheduler
             Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());
             std::thread schedulerThread([&] {
@@ -106,8 +110,11 @@ void InputManager::handleMainConsoleInput()
             system("cls");
             ConsoleManager::getInstance()->drawConsole();
         }
-        else if (command == "memory") {
-			FlatMemoryAllocator::getInstance()->printMemoryInfo(ConsoleManager::getInstance()->getTimeSlice());
+        else if (command == "vmstat") {
+            // TODO
+        }
+        else if (command == "process-smi") {
+			ConsoleManager::getInstance()->printProcessSmi();
         }
         else if (command == "screen") {
             if (tokens.size() > 1) {
@@ -120,7 +127,7 @@ void InputManager::handleMainConsoleInput()
                     }
                     else {
                         string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-                        auto screenInstance = std::make_shared<Screen>(processName, 0, timestamp, ConsoleManager::getInstance()->getMemPerProc());
+                        auto screenInstance = std::make_shared<Screen>(processName, 0, timestamp, ConsoleManager::getInstance()->getMinMemPerProc());
                         ConsoleManager::getInstance()->registerConsole(screenInstance);
 
                         ConsoleManager::getInstance()->switchConsole(processName);
