@@ -19,16 +19,7 @@ ConsoleManager::ConsoleManager() {
 
 void ConsoleManager::initialize() {
     consoleManager = new ConsoleManager();
-
-	
-
-	/*consoleManager->scheduler.initialize(num_cpu);
-	consoleManager->scheduler.start();
-	consoleManager->running = true;
-	consoleManager->switchSuccessful = true;
-	consoleManager->initialized = false;
-	consoleManager->currentConsole = nullptr;
-	consoleManager->screenMap = unordered_map<string, shared_ptr<BaseScreen>>();*/
+    ConsoleManager::getInstance()->initializeConfiguration();
 }
 
 void ConsoleManager::initializeConfiguration() {
@@ -266,6 +257,7 @@ void ConsoleManager::reportUtil() {
     }
 
     logStream << "\nFinished processes:" << std::endl;
+    
 
     // Log details of finished processes
     for (const auto& pair : screenMap) {
@@ -293,7 +285,10 @@ void ConsoleManager::reportUtil() {
     }
 }
 
-
+void ConsoleManager::initializeAllocators() {
+    FlatMemoryAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
+    PagingAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
+}
 
 int ConsoleManager::getNumCpu() {
 	return this->num_cpu;

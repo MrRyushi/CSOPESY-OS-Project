@@ -62,10 +62,6 @@ void InputManager::handleMainConsoleInput()
     if (ConsoleManager::getInstance()->getCurrentConsole()->getConsoleName() == MAIN_CONSOLE) {
         if (command == "initialize") {
             ConsoleManager::getInstance()->setInitialized(true);
-            ConsoleManager::getInstance()->initializeConfiguration();
-
-            FlatMemoryAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
-            PagingAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
 
             // Start scheduler
             Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());

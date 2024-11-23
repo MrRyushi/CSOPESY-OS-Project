@@ -40,7 +40,10 @@ int main()
     
     bool running = true;
     ConsoleManager::getInstance()->drawConsole();
+	size_t maxOverallMem = ConsoleManager::getInstance()->getMaxOverallMem();
 
+    FlatMemoryAllocator::initialize(maxOverallMem);
+    PagingAllocator::initialize(maxOverallMem);
 
     while (running){
         InputManager::getInstance()->handleMainConsoleInput();

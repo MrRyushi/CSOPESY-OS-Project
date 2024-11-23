@@ -35,7 +35,7 @@ Scheduler::Scheduler() {
 void Scheduler::start() {
     schedulerRunning = true;
     algorithm = ConsoleManager::getInstance()->getSchedulerConfig();
-
+	cout << "Scheduler algorithm: " << algorithm << endl;
     for (int i = 0; i < numCores; i++) {
         // Launch each core on a separate detached thread
         std::thread([this, i]() {

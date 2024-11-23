@@ -48,6 +48,7 @@ public:
 	void setMaxIns(int maxIns);
 	void setDelayPerExec(int delayPerExec);
 	void initializeConfiguration();
+	void initializeAllocators();
 
 	void setMaxOverallMem(size_t maxOverallMem);
 	void setMemPerFrame(size_t memPerFrame);
