@@ -407,7 +407,7 @@ void ConsoleManager::printProcessSmi() {
     for (const auto& pair : screenMap) {
         auto screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
         if (screenPtr && !screenPtr->isFinished() && screenPtr->getIsRunning()) {  // Only show running processes
-            size_t memoryUsage = screenPtr->getMemoryUsage();  // Assume this function exists
+            size_t memoryUsage = screenPtr->getMemoryUsage();
             cout << "Process: " << screenPtr->getProcessName()
                 << " | Memory: " << memoryUsage << " KB" << endl;
         }
@@ -423,6 +423,12 @@ void ConsoleManager::getMemoryUsage() {
     else {
         PagingAllocator::getInstance()->visualizeMemory();
     }
+}
+
+void ConsoleManager::printVmstat()
+{
+    cout << "Total Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() << endl;
+    cout << "Used Memory: " << PagingAllocator::getInstance()->getUsedMemory() << endl;
 }
 
 shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()

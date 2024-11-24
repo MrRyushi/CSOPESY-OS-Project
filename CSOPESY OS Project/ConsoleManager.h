@@ -63,6 +63,8 @@ public:
 	int getMaxIns();
 	int getDelayPerExec();
 	void printProcessSmi(); 
+	void printVmstat();
+	size_t getUsedMemory();
 	int getCpuCycles();
 	size_t getMaxOverallMem();
 	size_t getMemPerFrame();

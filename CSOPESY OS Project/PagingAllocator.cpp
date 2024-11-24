@@ -83,15 +83,12 @@ void PagingAllocator::visualizeMemory()
 		}
 	}
 
-	// Calculate memory usage
-	cout << usedFrames << " frames used" << endl;
-	size_t usedMemory = usedFrames * ConsoleManager::getInstance()->getMemPerFrame();
+	this->setUsedMemory(usedFrames * ConsoleManager::getInstance()->getMemPerFrame());
+	
 
 	// Display memory usage
-	std::cout << "Memory Usage: " << usedMemory << " / " << totalMemory << " bytes" << std::endl;
+	std::cout << "Memory Usage: " << this->usedMemory << " / " << totalMemory << " bytes" << std::endl;
 }
-
-
 
 size_t PagingAllocator::allocateFrames(size_t numFrames, string processName) {
 	size_t frameIndex = freeFrameList.back();
@@ -119,4 +116,13 @@ size_t PagingAllocator::getProcessMemoryUsage(const std::string& processName) {
 		return processMemoryMap.at(processName);
 	}
 	return 0;  // Process not found
+}
+
+size_t PagingAllocator::getUsedMemory()
+{
+	return this->usedMemory;
+}
+
+void PagingAllocator::setUsedMemory(size_t usedMemory) {
+	this->usedMemory = usedMemory;
 }

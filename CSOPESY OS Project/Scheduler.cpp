@@ -73,12 +73,18 @@ void Scheduler::start() {
                 // Update core tracking after process completion
                 {
                     std::lock_guard<std::mutex> lock(processQueueMutex);
+
+                    if (memoryPtr) {
+                        coresAvailable++;
+                        coresUsed--;
+                    }
+
                     --activeThreads; // Decrement active thread count
                     if (processQueue.empty() && activeThreads == 0) {
                         schedulerRunning = false;
                         processQueueCondition.notify_all();
-                        coresUsed--;
-                        coresAvailable++;
+                        coresUsed = 0;
+                        coresAvailable = ConsoleManager::getInstance()->getNumCpu();
                     }
                 }
             }
@@ -115,17 +121,6 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
         // Otherwise, ensure the process stays on its assigned core
         core = process->getCPUCoreID();
     }
-
-    // Allocate Memory Frames 
-    void* allocatedMemory = PagingAllocator::getInstance()->allocate(process);
-    if (!allocatedMemory) {
-        std::cerr << "Process " << process->getProcessName()
-            << " cannot proceed. Insufficient memory. \n";
-
-        addProcessToQueue(process);
-        return;
-    }
-
 
     if (algorithm == "fcfs") {
         // First-Come, First-Served logic

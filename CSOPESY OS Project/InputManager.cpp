@@ -113,7 +113,7 @@ void InputManager::handleMainConsoleInput()
             ConsoleManager::getInstance()->drawConsole();
         }
         else if (command == "vmstat") {
-            // TODO
+            ConsoleManager::getInstance()->printVmstat();
         }
         else if (command == "process-smi") {
 			ConsoleManager::getInstance()->printProcessSmi();
@@ -129,6 +129,7 @@ void InputManager::handleMainConsoleInput()
                     }
                     else {
                         string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
+                        // TODO: should be either 256 or 512 if num per memory frame is 256?
                         auto screenInstance = std::make_shared<Screen>(processName, 0, timestamp, ConsoleManager::getInstance()->getMinMemPerProc());
                         ConsoleManager::getInstance()->registerConsole(screenInstance);
 

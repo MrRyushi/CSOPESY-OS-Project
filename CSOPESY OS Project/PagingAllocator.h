@@ -16,6 +16,8 @@ public:
 	void deallocate(std::shared_ptr<Screen> process);
 	void visualizeMemory();
 	size_t getProcessMemoryUsage(const std::string& processName);
+	size_t getUsedMemory();
+	void setUsedMemory(size_t usedMemory);
 
 private:
 	static PagingAllocator* pagingAllocator;
@@ -24,6 +26,7 @@ private:
 
 	size_t maxMemorySize;
 	size_t numFrames;
+	size_t usedMemory = 0;
 
 	size_t allocateFrames(size_t numFrames, string processName);
 	void deallocateFrames(size_t numFrames, size_t frameIndex);
