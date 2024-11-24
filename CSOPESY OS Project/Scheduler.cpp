@@ -111,7 +111,6 @@ void Scheduler::stop() {
 void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* memoryPtr) {
     string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
 
-
     // Ensure the process keeps its original core for FCFS and RR
     if (process->getCPUCoreID() == -1) {
         // If core is not yet assigned, set the current core as the affinity core
@@ -122,7 +121,10 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
         core = process->getCPUCoreID();
     }
 
+
+
     if (algorithm == "fcfs") {
+        process->setIsRunning(true); // Mark process as running
         // First-Come, First-Served logic
         for (int i = 0; i < process->getTotalLine(); i++) {
             if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
@@ -135,6 +137,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
             }
             process->setCurrentLine(process->getCurrentLine() + 1);
         }
+        process->setIsRunning(false); // Mark process as finished
         FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
     }
 	
@@ -144,6 +147,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
 
        // Process for the duration of the quantum or until the process is finished
        for (int i = 0; i < quantum && process->getCurrentLine() < process->getTotalLine(); i++) {
+           process->setIsRunning(true); // Mark process as running
            if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
                for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -161,21 +165,22 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
 
        // deallocate 
        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
-
-
         //if process is not finished, re-queue it but retain its core affinity
        if (process->getCurrentLine() < process->getTotalLine()) {
+		   process->setIsRunning(false); // Mark process as not running
            std::lock_guard<std::mutex> lock(processQueueMutex);
            processQueue.push(process);  // Re-queue the unfinished process
            processQueueCondition.notify_one();
        }
     }
 
+    
     // Deallocate frames after execution 
     PagingAllocator::getInstance()->deallocate(process);
 
     string timestampFinished = ConsoleManager::getInstance()->getCurrentTimestamp();
     process->setTimestampFinished(timestampFinished);  // Log completion time
+    process->setIsRunning(false); // Mark process as finished
 }
 
 

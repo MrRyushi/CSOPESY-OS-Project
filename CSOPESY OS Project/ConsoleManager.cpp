@@ -191,7 +191,7 @@ void ConsoleManager::displayProcessList() {
     for (const auto& pair : screenMap) {
         shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
 
-        if (screenPtr && !screenPtr->isFinished()) {
+        if (screenPtr && screenPtr->getIsRunning()) {
 
             auto coreID = screenPtr->getCPUCoreID();
             string coreIDstr;

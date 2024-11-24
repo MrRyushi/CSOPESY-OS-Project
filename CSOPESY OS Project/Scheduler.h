@@ -38,6 +38,8 @@ public:
 
 	int getCpuCycles() const;
 	void setCpuCycles(int cpuCycles);
+    std::shared_ptr<Screen> currentRunningProcess;
+    std::mutex processMutex;
 
 private:
     int numCores;
@@ -49,6 +51,7 @@ private:
     std::queue<std::shared_ptr<Screen>> processQueue;
     std::mutex processQueueMutex;
     std::condition_variable processQueueCondition;
+ 
     static Scheduler* scheduler;
     string algorithm = "";
 };
