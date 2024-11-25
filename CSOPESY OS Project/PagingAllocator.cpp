@@ -90,26 +90,27 @@ void PagingAllocator::visualizeMemory()
 	std::cout << "Memory Usage: " << this->usedMemory << " / " << totalMemory << " bytes" << std::endl;
 }
 
-size_t PagingAllocator::allocateFrames(size_t numFrames, string processName) {
-	size_t frameIndex = freeFrameList.back();
-	freeFrameList.pop_back();
-
-	for (size_t i = 0; i < numFrames; ++i) {
-		frameMap[frameIndex + i] = processName;
-	}
-
-	return frameIndex;
-}
-
-void PagingAllocator::deallocateFrames(size_t numFrames, size_t frameIndex) {
-	for (size_t i = 0; i < numFrames; ++i) {
-		frameMap.erase(frameIndex + i);
-	}
-
-	for (size_t i = 0; i < numFrames; ++i) {
-		freeFrameList.push_back(frameIndex + i);
-	}
-}
+//size_t PagingAllocator::allocateFrames(size_t numFrames, string processName) {
+//	size_t frameIndex = freeFrameList.back();
+//	freeFrameList.pop_back();
+//
+//	for (size_t i = 0; i < numFrames; ++i) {
+//		frameMap[frameIndex + i] = processName;
+//	}
+//	numPagedIn += numFrames;
+//	return frameIndex;
+//}
+//
+//void PagingAllocator::deallocateFrames(size_t numFrames, size_t frameIndex) {
+//	for (size_t i = 0; i < numFrames; ++i) {
+//		frameMap.erase(frameIndex + i);
+//	}
+//
+//	for (size_t i = 0; i < numFrames; ++i) {
+//		freeFrameList.push_back(frameIndex + i);
+//	}
+//	numPagedOut += numFrames;
+//}
 
 size_t PagingAllocator::getProcessMemoryUsage(const std::string& processName) {
 	if (processMemoryMap.find(processName) != processMemoryMap.end()) {
@@ -125,4 +126,12 @@ size_t PagingAllocator::getUsedMemory()
 
 void PagingAllocator::setUsedMemory(size_t usedMemory) {
 	this->usedMemory = usedMemory;
+}
+
+size_t PagingAllocator::getNumPagedIn() const {
+	return numPagedIn;
+}
+
+size_t PagingAllocator::getNumPagedOut() const {
+	return numPagedOut;
 }

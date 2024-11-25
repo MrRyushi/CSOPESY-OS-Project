@@ -425,10 +425,20 @@ void ConsoleManager::getMemoryUsage() {
     }
 }
 
-void ConsoleManager::printVmstat()
-{
-    cout << "Total Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() << endl;
-    cout << "Used Memory: " << PagingAllocator::getInstance()->getUsedMemory() << endl;
+void ConsoleManager::printVmstat() {
+    cout << "Total Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() << " KB" << endl;
+    cout << "Used Memory: " << PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
+    cout << "Free Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() - PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
+    cout << "Idle CPU Ticks: " << endl;
+    cout << "Active CPU Ticks: " << endl;
+    cout << "Total CPU Ticks: " << endl;
+    cout << "Num paged in: " << endl;
+    cout << "Num paged out: " << endl;
+    //cout << "Idle CPU Ticks: " << Scheduler::getInstance()->getIdleCpuTicks() << endl;
+    //cout << "Active CPU Ticks: " << Scheduler::getInstance()->getActiveCpuTicks() << endl;
+    //cout << "Total CPU Ticks: " << Scheduler::getInstance()->getTotalCpuTicks() << endl;
+    //cout << "Num paged in: " << PagingAllocator::getInstance()->getNumPagedIn() << endl;
+    //cout << "Num paged out: " << PagingAllocator::getInstance()->getNumPagedOut() << endl;
 }
 
 shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
