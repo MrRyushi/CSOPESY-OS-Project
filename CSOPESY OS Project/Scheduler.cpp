@@ -37,6 +37,7 @@ void Scheduler::start() {
     algorithm = ConsoleManager::getInstance()->getSchedulerConfig();
     for (int i = 0; i < numCores; i++) {
         // Launch each core on a separate detached thread
+        
         std::thread([this, i]() {
             while (schedulerRunning) {
                 std::shared_ptr<Screen> process;
@@ -51,6 +52,7 @@ void Scheduler::start() {
                     processQueue.pop();
                     ++activeThreads; // Increment active thread count
                 }
+
 				void* memoryPtr = nullptr;
 			
 				if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
@@ -73,6 +75,7 @@ void Scheduler::start() {
                 // Update core tracking after process completion
                 {
                     std::lock_guard<std::mutex> lock(processQueueMutex);
+
 
                     if (memoryPtr) {
                         coresAvailable++;
@@ -98,6 +101,11 @@ int Scheduler::getCoresUsed() const {
 
 int Scheduler::getCoresAvailable() const {
     return coresAvailable;
+}
+
+int Scheduler::getIdleCpuTicks()
+{
+    return idleCpuTicks;
 }
 
 void Scheduler::stop() {
@@ -134,8 +142,13 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
             process->setCurrentLine(process->getCurrentLine() + 1);
+            // Increment active cpu tick
+            cpuCycles++;
+
+            if (coresAvailable > 0) {
+                idleCpuTicks += coresAvailable;
+            }
         }
-        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
     }
 	
     else if (algorithm == "rr") {
@@ -153,15 +166,14 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
 			   std::this_thread::sleep_for(std::chrono::milliseconds(100));
            }
            process->setCurrentLine(process->getCurrentLine() + 1);
+
+           // Increment active cpu tick
+           cpuCycles++;
+
+           if (coresAvailable > 0) {
+               idleCpuTicks += coresAvailable;
+           }
        }
-
-      
-       //FlatMemoryAllocator::getInstance()->printMemoryInfo(quantum);
-
-
-       // deallocate 
-       FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
-
 
         //if process is not finished, re-queue it but retain its core affinity
        if (process->getCurrentLine() < process->getTotalLine()) {
@@ -172,7 +184,13 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
     }
 
     // Deallocate frames after execution 
-    PagingAllocator::getInstance()->deallocate(process);
+    if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
+    }
+    else {
+        PagingAllocator::getInstance()->deallocate(process);
+    }
+    
 
     string timestampFinished = ConsoleManager::getInstance()->getCurrentTimestamp();
     process->setTimestampFinished(timestampFinished);  // Log completion time

@@ -88,7 +88,16 @@ size_t FlatMemoryAllocator::getProcessMemoryUsage(const std::string& processName
 	return 0;  // Process not found
 }
 
+size_t FlatMemoryAllocator::getTotalMemoryUsage() const {
+	size_t totalMemoryUsage = 0;
 
+	// Iterate over the map and sum up the memory usage
+	for (const auto& entry : processMemoryMap) {
+		totalMemoryUsage += entry.second; // Add memory usage for each process
+	}
+
+	return totalMemoryUsage;
+}
 
 
 void FlatMemoryAllocator::initializeMemory() {

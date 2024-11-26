@@ -191,7 +191,7 @@ void ConsoleManager::displayProcessList() {
     for (const auto& pair : screenMap) {
         shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
 
-        if (screenPtr && !screenPtr->isFinished()) {
+        if (screenPtr && !screenPtr->isFinished() && screenPtr->getIsRunning()) {
 
             auto coreID = screenPtr->getCPUCoreID();
             string coreIDstr;
@@ -427,11 +427,19 @@ void ConsoleManager::getMemoryUsage() {
 
 void ConsoleManager::printVmstat() {
     cout << "Total Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() << " KB" << endl;
-    cout << "Used Memory: " << PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
-    cout << "Free Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() - PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
-    cout << "Idle CPU Ticks: " << endl;
-    cout << "Active CPU Ticks: " << endl;
-    cout << "Total CPU Ticks: " << endl;
+    if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+        cout << "Used Memory: " << FlatMemoryAllocator::getInstance()->getTotalMemoryUsage() << " KB" << endl;
+        cout << "Free Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() - FlatMemoryAllocator::getInstance()->getTotalMemoryUsage() << " KB" << endl;
+    }
+    else {
+        cout << "Used Memory: " << PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
+        cout << "Free Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() - PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
+    }
+    
+    
+    cout << "Idle CPU Ticks: " << Scheduler::getInstance()->getIdleCpuTicks() << endl;
+    cout << "Active CPU Ticks: " << Scheduler::getInstance()->getCpuCycles() << endl;
+    cout << "Total CPU Ticks: " << Scheduler::getInstance()->getCpuCycles() + Scheduler::getInstance()->getIdleCpuTicks() << endl;
     cout << "Num paged in: " << endl;
     cout << "Num paged out: " << endl;
     //cout << "Idle CPU Ticks: " << Scheduler::getInstance()->getIdleCpuTicks() << endl;

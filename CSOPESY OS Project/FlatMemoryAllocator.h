@@ -25,6 +25,8 @@ public:
     FlatMemoryAllocator() : maximumSize(0), allocatedSize(0) {};
 	size_t getProcessMemoryUsage(const std::string& processName) const;
 
+	size_t getTotalMemoryUsage() const;
+
 	void printMemoryInfo(int quantum);
 	size_t calculateExternalFragmentation();
 	size_t getNumberOfProcessesInMemory();

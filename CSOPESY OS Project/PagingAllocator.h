@@ -15,6 +15,7 @@ public:
 	void* allocate(std::shared_ptr<Screen> process);
 	void deallocate(std::shared_ptr<Screen> process);
 	void visualizeMemory();
+	size_t calculateUsedFrames();
 	size_t getProcessMemoryUsage(const std::string& processName);
 	size_t getUsedMemory();
 	void setUsedMemory(size_t usedMemory);

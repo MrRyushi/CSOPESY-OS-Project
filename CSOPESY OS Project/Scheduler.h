@@ -33,6 +33,7 @@ public:
 
     int getCoresUsed() const;
     int getCoresAvailable() const;
+    int getIdleCpuTicks();
     int coresUsed = 0; // Tracks how many cores are currently used
     int coresAvailable; // Tracks how many cores are available
 
@@ -42,6 +43,7 @@ public:
 private:
     int numCores;
     int cpuCycles = 0;
+    int idleCpuTicks = 0;
     bool schedulerRunning;
 	int activeThreads;
     bool schedulerTestRunning = false;

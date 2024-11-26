@@ -113,6 +113,14 @@ void InputManager::handleMainConsoleInput()
             ConsoleManager::getInstance()->drawConsole();
         }
         else if (command == "vmstat") {
+            if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+                size_t memoryUsage = FlatMemoryAllocator::getInstance()->getTotalMemoryUsage();
+            }
+            else {
+                size_t usedFrames = PagingAllocator::getInstance()->calculateUsedFrames();
+                PagingAllocator::getInstance()->setUsedMemory(usedFrames * ConsoleManager::getInstance()->getMemPerFrame());
+            }
+
             ConsoleManager::getInstance()->printVmstat();
         }
         else if (command == "process-smi") {
