@@ -290,6 +290,18 @@ void ConsoleManager::initializeAllocators() {
     PagingAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
 }
 
+std::shared_ptr<Screen> ConsoleManager::getScreenByProcessName(const std::string& processName) {
+    unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
+    auto it = screenMap.find(processName);
+    if (it != screenMap.end()) {
+        std::shared_ptr<Screen> process = std::dynamic_pointer_cast<Screen>(it->second);
+        if(process) {
+            return process;  // Successfully casted to Screen
+        }
+    }
+    return nullptr;  // Process not found
+}
+
 int ConsoleManager::getNumCpu() {
 	return this->num_cpu;
 }

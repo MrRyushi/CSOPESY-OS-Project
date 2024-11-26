@@ -50,6 +50,9 @@ public:
 	void initializeConfiguration();
 	void initializeAllocators();
 
+	std::shared_ptr<Screen> getScreenByProcessName(const std::string& processName);
+	std::unordered_map<std::string, std::shared_ptr<Screen>> processNameToScreenMap;
+
 	void setMaxOverallMem(size_t maxOverallMem);
 	void setMemPerFrame(size_t memPerFrame);
 	void setMinMemPerProc(size_t minMemPerProc);

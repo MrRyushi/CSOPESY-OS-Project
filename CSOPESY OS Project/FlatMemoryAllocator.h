@@ -3,6 +3,7 @@
 #include <vector>
 #include <unordered_map>
 #include "Screen.h"
+#include <queue>
 
 using namespace std;
 
@@ -13,6 +14,8 @@ public:
     
 	FlatMemoryAllocator(size_t maximumSize);
     void* allocate(size_t size, string process, std::shared_ptr<Screen>);
+	size_t findProcessStartIndex(const std::string& processName);
+	void visualizeBackingStore();
     void deallocate(void* ptr, std::shared_ptr<Screen>);
     std::string visualizeMemory();
 	void visualizeMemoryASCII();
@@ -20,6 +23,7 @@ public:
     bool canAllocateAt(size_t index, size_t size);
     void allocateAt(size_t index, size_t size, string processName);
     void deallocateAt(size_t index, std::shared_ptr<Screen>);
+	void restoreFromBackingStore();
 	static FlatMemoryAllocator* getInstance();
 	static void initialize(size_t maximumMemorySize);
     FlatMemoryAllocator() : maximumSize(0), allocatedSize(0) {};
@@ -38,6 +42,7 @@ private:
 	std::vector<char> memory;
 	std::unordered_map<size_t, string> allocationMap;
 	std::unordered_map<std::string, size_t> processMemoryMap;
+	std::queue<shared_ptr<Screen>> backingStore;
 
 
 };

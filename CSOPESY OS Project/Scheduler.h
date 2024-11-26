@@ -40,6 +40,8 @@ public:
 	int getCpuCycles() const;
 	void setCpuCycles(int cpuCycles);
 
+    //void* getMemoryPtr();
+
 private:
     int numCores;
     int cpuCycles = 0;
@@ -53,6 +55,7 @@ private:
     std::condition_variable processQueueCondition;
     static Scheduler* scheduler;
     string algorithm = "";
+    //void* memoryPtr;
 };
 
 #endif // SCHEDULER_H
