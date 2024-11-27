@@ -54,13 +54,25 @@ void Scheduler::start() {
                 }
 
 				void* memoryPtr = nullptr;
+				bool isFlatMemory = ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc();
 			
-				if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
-                    memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName(), process);
-				}
-                else {
-					memoryPtr = PagingAllocator::getInstance()->allocate(process);
+                if (process->getIsRunning() == false) {
+                    if (isFlatMemory) {
+                        memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName(), process);
+                    }
+                    else {
+                        memoryPtr = PagingAllocator::getInstance()->allocate(process);
+                    }
                 }
+                else {
+                    if (isFlatMemory) {
+                        memoryPtr = FlatMemoryAllocator::getInstance()->getMemoryPtr(process->getProcessName(), process);
+                    }
+                    else {
+                        //memoryPtr = PagingAllocator::getInstance()->getMemoryPtr(process);
+                    }
+                }
+        
 
                 if (memoryPtr) {
                     coresAvailable--;
@@ -69,8 +81,34 @@ void Scheduler::start() {
                     workerFunction(i, process, memoryPtr);
                 }
                 else {
-                    addProcessToQueue(process);
+					
+                    // add to backing store
+                    if (isFlatMemory) {
+                        // get oldest process
+						std::shared_ptr<Screen> oldestProcess = FlatMemoryAllocator::getInstance()->findOldestProcess();
+						//cout << "Oldest process: " << oldestProcess->getProcessName() << endl;
+                        // get memory ptr of the oldest process
+						void* oldestMemoryPtr = FlatMemoryAllocator::getInstance()->getMemoryPtr(oldestProcess->getProcessName(), oldestProcess);
+
+                        // deallocate the oldest process
+						FlatMemoryAllocator::getInstance()->deallocate(oldestMemoryPtr, oldestProcess);
+
+						// put the oldest process back to backing store
+                        FlatMemoryAllocator::getInstance()->allocateFromBackingStore(oldestProcess);
+
+                        // if the process is in backing store, remove it from the backing store
+						FlatMemoryAllocator::getInstance()->findAndRemoveProcessFromBackingStore(process);
+						// allocate the new process
+						void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName(), process);
+					    
+                        if (memoryPtr) {
+                            process->setCPUCoreID(i);
+                            workerFunction(i, process, memoryPtr);
+                        }
+                    }
+
                 }
+                
 
                 // Update core tracking after process completion
                 {
@@ -152,43 +190,44 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
     }
 	
     else if (algorithm == "rr") {
-       // Round-Robin logic
-       int quantum = ConsoleManager::getInstance()->getTimeSlice();  // Get RR time slice
+        // Round-Robin logic
+        int quantum = ConsoleManager::getInstance()->getTimeSlice();  // Get RR time slice
 
-       // Process for the duration of the quantum or until the process is finished
-       for (int i = 0; i < quantum && process->getCurrentLine() < process->getTotalLine(); i++) {
-           if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
-               for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
-                   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-               }
-           }
-		   else {
-			   std::this_thread::sleep_for(std::chrono::milliseconds(100));
-           }
-           process->setCurrentLine(process->getCurrentLine() + 1);
+        // Process for the duration of the quantum or until the process is finished
+        for (int i = 0; i < quantum && process->getCurrentLine() < process->getTotalLine(); i++) {
+            if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
+                for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
+                    std::this_thread::sleep_for(std::chrono::milliseconds(100));
+                }
+            }
+            else {
+                std::this_thread::sleep_for(std::chrono::milliseconds(100));
+            }
+            process->setCurrentLine(process->getCurrentLine() + 1);
 
-           // Increment active cpu tick
-           cpuCycles++;
+            // Increment active cpu tick
+            cpuCycles++;
 
-           if (coresAvailable > 0) {
-               idleCpuTicks += coresAvailable;
-           }
-       }
+            if (coresAvailable > 0) {
+                idleCpuTicks += coresAvailable;
+            }
+        }
 
         //if process is not finished, re-queue it but retain its core affinity
-       if (process->getCurrentLine() < process->getTotalLine()) {
-           std::lock_guard<std::mutex> lock(processQueueMutex);
-           processQueue.push(process);  // Re-queue the unfinished process
-           processQueueCondition.notify_one();
-       }
-    }
+        if (process->getCurrentLine() < process->getTotalLine()) {
+            std::lock_guard<std::mutex> lock(processQueueMutex);
+            processQueue.push(process);  // Re-queue the unfinished process
+            processQueueCondition.notify_one();
+        }
+        else {
+            if (ConsoleManager::getInstance()->getMinMemPerProc() != ConsoleManager::getInstance()->getMaxMemPerProc()) {
+                PagingAllocator::getInstance()->deallocate(process);
+            }
+            else {
+                FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);  // Deallocate memory
+            }
+        }
 
-    // Deallocate frames after execution 
-    if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
-        FlatMemoryAllocator::getInstance()->deallocate(memoryPtr, process);
-    }
-    else {
-        PagingAllocator::getInstance()->deallocate(process);
     }
     
 
