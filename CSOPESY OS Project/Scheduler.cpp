@@ -55,6 +55,7 @@ void Scheduler::start() {
 
 				void* memoryPtr = nullptr;
 				bool isFlatMemory = ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc();
+                bool isPagingRunning = false;
 			
                 if (process->getIsRunning() == false) {
                     if (isFlatMemory) {
@@ -66,46 +67,92 @@ void Scheduler::start() {
                 }
                 else {
                     if (isFlatMemory) {
-                        memoryPtr = FlatMemoryAllocator::getInstance()->getMemoryPtr(process->getProcessName(), process);
+                        memoryPtr = FlatMemoryAllocator::getInstance()->getMemoryPtr(process->getMemoryRequired(), process->getProcessName(), process);
                     }
                     else {
-                        //memoryPtr = PagingAllocator::getInstance()->getMemoryPtr(process);
+                        memoryPtr = PagingAllocator::getInstance()->isProcessAllocated(process->getProcessName());
                     }
                 }
-        
 
-                if (memoryPtr) {
-                    coresAvailable--;
-                    coresUsed++;
-                    process->setCPUCoreID(i);
-                    workerFunction(i, process, memoryPtr);
+                
+                if (isFlatMemory) {
+                    if (memoryPtr) {
+                        coresAvailable--;
+                        coresUsed++;
+                        process->setCPUCoreID(i);
+                        workerFunction(i, process, memoryPtr);
+                    }
+
+                    else {
+
+                        // add to backing store
+                        if (isFlatMemory) {
+                            // get oldest process
+                            std::shared_ptr<Screen> oldestProcess = FlatMemoryAllocator::getInstance()->findOldestProcess();
+                            //cout << "Oldest process: " << oldestProcess->getProcessName() << endl;
+                            // get memory ptr of the oldest process
+                            void* oldestMemoryPtr = FlatMemoryAllocator::getInstance()->getMemoryPtr(oldestProcess->getMemoryRequired(), oldestProcess->getProcessName(), oldestProcess);
+
+
+                            // deallocate the oldest process
+                            FlatMemoryAllocator::getInstance()->deallocate(oldestMemoryPtr, oldestProcess);
+
+                            // put the oldest process back to backing store
+                            FlatMemoryAllocator::getInstance()->allocateFromBackingStore(oldestProcess);
+
+                            // if the process is in backing store, remove it from the backing store
+                            FlatMemoryAllocator::getInstance()->findAndRemoveProcessFromBackingStore(process);
+                            // allocate the new process
+                            void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName(), process);
+
+                            if (memoryPtr) {
+                                process->setCPUCoreID(i);
+                                workerFunction(i, process, memoryPtr);
+                            }
+                        }
+                    }
                 }
                 else {
-					
-                    // add to backing store
-                    if (isFlatMemory) {
+                /*    cout << "PAGING: " << isPagingRunning << endl;*/
+                    cout << "MEMORY: " << memoryPtr << endl;
+
+                    if (memoryPtr) {
+                        coresAvailable--;
+                        coresUsed++;
+                        process->setCPUCoreID(i);
+                        workerFunction(i, process, memoryPtr);
+                    }
+                    else {
                         // get oldest process
-						std::shared_ptr<Screen> oldestProcess = FlatMemoryAllocator::getInstance()->findOldestProcess();
-						//cout << "Oldest process: " << oldestProcess->getProcessName() << endl;
-                        // get memory ptr of the oldest process
-						void* oldestMemoryPtr = FlatMemoryAllocator::getInstance()->getMemoryPtr(oldestProcess->getProcessName(), oldestProcess);
+                        
 
-                        // deallocate the oldest process
-						FlatMemoryAllocator::getInstance()->deallocate(oldestMemoryPtr, oldestProcess);
+                        string oldestProcessStr = PagingAllocator::getInstance()->findOldestProcess();
+                        std::shared_ptr<Screen> oldestProcess = ConsoleManager::getInstance()->getScreenByProcessName(oldestProcessStr);
 
-						// put the oldest process back to backing store
-                        FlatMemoryAllocator::getInstance()->allocateFromBackingStore(oldestProcess);
+                        /*if (oldestProcess) {
+                            cout << "Existing" << endl;
+                        }
+                        else {
+                            cout << "NOT EXISTING" << endl;
+                        }*/
 
-                        // if the process is in backing store, remove it from the backing store
-						FlatMemoryAllocator::getInstance()->findAndRemoveProcessFromBackingStore(process);
-						// allocate the new process
-						void* memoryPtr = FlatMemoryAllocator::getInstance()->allocate(process->getMemoryRequired(), process->getProcessName(), process);
-					    
+                        /*cout << "OLDEST: " << oldestProcessStr << endl;*/
+
+                        PagingAllocator::getInstance()->deallocate(oldestProcess);
+
+                        PagingAllocator::getInstance()->allocateFromBackingStore(oldestProcess);
+
+                        PagingAllocator::getInstance()->findAndRemoveProcessFromBackingStore(process);
+
+                        void* memoryPtr = PagingAllocator::getInstance()->allocate(process);
+
                         if (memoryPtr) {
                             process->setCPUCoreID(i);
                             workerFunction(i, process, memoryPtr);
                         }
                     }
+
+                    
 
                 }
                 

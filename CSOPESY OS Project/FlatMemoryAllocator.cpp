@@ -33,6 +33,15 @@ std::mutex allocationMapMutex;  // Mutex for protecting allocationMap
 void* FlatMemoryAllocator::allocate(size_t size, string processName, std::shared_ptr<Screen> process) {
 	{
 		std::lock_guard<std::mutex> lock(allocationMapMutex);  // Lock to ensure thread safety	
+
+		/*std::cout << "Allocating process: " << processName << ", size: " << size
+			<< ", allocated size: " << allocatedSize
+			<< ", maximum size: " << maximumSize << std::endl;
+
+		std::cout << "Allocation Map State Before Allocation:" << std::endl;*/
+		/*for (const auto& entry : allocationMap) {
+			std::cout << "Index: " << entry.first << ", Process: " << entry.second << std::endl;
+		}*/
 		// Check for the availability of a suitable block
 		for (size_t i = 0; i < maximumSize - size + 1; ++i) {
 			// Check if the memory block is available
@@ -49,6 +58,7 @@ void* FlatMemoryAllocator::allocate(size_t size, string processName, std::shared
 				}
 			}
 		}
+
 	}
 
 	return nullptr;  // Return nullptr if allocation fails
@@ -172,6 +182,8 @@ bool FlatMemoryAllocator:: canAllocateAt(size_t index, size_t size) {
 void FlatMemoryAllocator::allocateAt(size_t index, size_t size, string processName) {
 	// Fill allocation map with true values starting from index until the process size
 	for (size_t i = index; i < index + size; ++i) {
+		/*cout << "index: " << i << endl;
+		cout << "p: " << processName << endl;*/
 		allocationMap[i] = processName; 
 	}
 	allocatedSize += size;
@@ -183,7 +195,7 @@ void FlatMemoryAllocator::deallocateAt(size_t index, std::shared_ptr<Screen> pro
 	//cout << "process name: " << process->getProcessName() << endl;
 	for (size_t i = index; i < index + size && i < maximumSize; ++i) {
 		allocationMap[i]  = "";
-		cout << "deallocateAt: " << i << endl;
+		/*cout << "deallocateAt: " << i << endl;*/
 	}
 	allocatedSize -= size;
 
@@ -319,14 +331,25 @@ size_t FlatMemoryAllocator::getNumberOfProcessesInMemory() {
 	return allocatedBlocks / processSizeInBlocks;  // Total number of processes in memory
 }
 
-void* FlatMemoryAllocator::getMemoryPtr(string processName, std::shared_ptr<Screen> process) {
+void* FlatMemoryAllocator::getMemoryPtr(size_t size, string processName, std::shared_ptr<Screen> process) {
 	std::lock_guard<std::mutex> lock(allocationMapMutex);
 
 	// Search for the starting index of the process in the allocationMap
-	for (const auto& entry : allocationMap) {
-		if (entry.second == processName) {
-			size_t index = entry.first; // Get the starting index
-			return &memory[index];     // Return the memory pointer
+	//for (const auto& entry : allocationMap) {
+	//	if (entry.second == processName) {
+	//		size_t index = entry.first; // Get the starting index
+	//		return &memory[index];     // Return the memory pointer
+	//	}
+
+	///*	cout << "Process Name: " << processName << endl;
+	//	cout << "Index: " << entry.first << endl;*/
+	//}
+
+	for (size_t i = 0; i < maximumSize - size + 1; ++i) {
+		if (processName == allocationMap[i]) {
+			/*cout << "I: " << i << endl;*/
+
+			return &memory[i];
 		}
 	}
 
@@ -350,6 +373,14 @@ void FlatMemoryAllocator::findAndRemoveProcessFromBackingStore(std::shared_ptr<S
 	}
 
 	//cout << backingStore.size() << endl;
+}
+
+size_t FlatMemoryAllocator::getAllocatedSize() {
+	return allocatedSize;
+}
+
+std::unordered_map<size_t, string> FlatMemoryAllocator::getAllocationMap() {
+	return allocationMap;
 }
 
 

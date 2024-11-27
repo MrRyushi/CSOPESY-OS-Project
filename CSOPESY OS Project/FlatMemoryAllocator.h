@@ -30,9 +30,11 @@ public:
 	size_t getProcessMemoryUsage(const std::string& processName) const;
 	void allocateFromBackingStore(std::shared_ptr<Screen> process);
 	std::shared_ptr<Screen> findOldestProcess();
-	void* getMemoryPtr(string processName, std::shared_ptr<Screen> process);
+	void* getMemoryPtr(size_t size, string processName, std::shared_ptr<Screen> process);
 	void findAndRemoveProcessFromBackingStore(std::shared_ptr<Screen> process);
 	void displayAllocationMap() const;
+	size_t getAllocatedSize(); 
+	std::unordered_map<size_t, string> getAllocationMap();
 
 	size_t getTotalMemoryUsage() const;
 
@@ -49,7 +51,5 @@ private:
 	std::unordered_map<size_t, string> allocationMap;
 	std::unordered_map<std::string, size_t> processMemoryMap;
 	std::vector<shared_ptr<Screen>> backingStore;
-
-
 };
 
