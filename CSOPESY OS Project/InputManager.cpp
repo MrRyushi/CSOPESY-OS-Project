@@ -152,7 +152,13 @@ void InputManager::handleMainConsoleInput()
                 }
                 else if (screenCommand == "-ls") {
                     ConsoleManager::getInstance()->displayProcessList();
-                    FlatMemoryAllocator::getInstance()->visualizeBackingStore();
+                    if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+                        FlatMemoryAllocator::getInstance()->visualizeBackingStore();
+                    }
+                    else {
+                        PagingAllocator::getInstance()->visualizeBackingStore();
+                    }
+                    
                 }
                 else {
                     cout << "Command not recognized." << endl;

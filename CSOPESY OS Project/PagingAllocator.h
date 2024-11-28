@@ -13,7 +13,7 @@ public:
 
 	static PagingAllocator* getInstance();
 
-	void* allocate(std::shared_ptr<Screen> process);
+	bool allocate(std::shared_ptr<Screen> process);
 	void deallocate(std::shared_ptr<Screen> process);
 	void visualizeMemory();
 	size_t calculateUsedFrames();
@@ -23,10 +23,11 @@ public:
 	void findAndRemoveProcessFromBackingStore(std::shared_ptr<Screen> process);
 	void setUsedMemory(size_t usedMemory);
 	std::string findOldestProcess();
-	void* isProcessAllocated(const std::string& processName);
+	bool isProcessInMemory(const std::string& processName);
+	void visualizeBackingStore();
 
-	//size_t getNumPagedIn() const;
-	//size_t getNumPagedOut() const;
+	size_t getNumPagedIn() const;
+	size_t getNumPagedOut() const;
 
 private:
 	static PagingAllocator* pagingAllocator;
@@ -44,7 +45,7 @@ private:
 	std::vector<shared_ptr<Screen>> backingStore;
 	std::queue<shared_ptr<Screen>> allocationMap;
 
-	//size_t numPagedIn = 0;  // Tracks the number of pages paged into memory
-	//size_t numPagedOut = 0; // Tracks the number of pages paged out of memory
+	size_t numPagedIn = 0;  // Tracks the number of pages paged into memory
+	size_t numPagedOut = 0; // Tracks the number of pages paged out of memory
 };
 

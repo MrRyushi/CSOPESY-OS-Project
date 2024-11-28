@@ -123,8 +123,10 @@ void FlatMemoryAllocator::deallocate(void* ptr, std::shared_ptr<Screen> process)
 	// Proceed with deallocation
 	if (allocationMap[index] != "") {
 		deallocateAt(index, process);
-		process->setIsRunning(false);
+		//process->setIsRunning(false);
+
 	}
+	process->setMemoryUsage(0);
 }
 
 
@@ -230,22 +232,15 @@ void FlatMemoryAllocator::restoreFromBackingStore() {
 }
 
 void FlatMemoryAllocator::visualizeBackingStore() {
-	// Create a temporary copy of the queue for iteration
-	std::vector<std::shared_ptr<Screen>> tempQueue = backingStore;
-
-	if (tempQueue.empty()) {
+	if (backingStore.empty()) {
 		std::cout << "Backing store is empty." << std::endl;
-		cout << processMemoryMap.empty() << endl;
 		return;
 	}
 
 	std::cout << "Backing Store Contents:" << std::endl;
 
 	size_t index = 0; // Index to track the position of the process in the queue
-	while (!tempQueue.empty()) {
-		std::shared_ptr<Screen> process = tempQueue.front();
-		tempQueue.pop_back();
-
+	for (const auto& process : backingStore) {
 		// Access information from the Screen object
 		std::cout << "Index: " << index++
 			<< ", Process Name: " << process->getProcessName()
@@ -333,17 +328,6 @@ size_t FlatMemoryAllocator::getNumberOfProcessesInMemory() {
 
 void* FlatMemoryAllocator::getMemoryPtr(size_t size, string processName, std::shared_ptr<Screen> process) {
 	std::lock_guard<std::mutex> lock(allocationMapMutex);
-
-	// Search for the starting index of the process in the allocationMap
-	//for (const auto& entry : allocationMap) {
-	//	if (entry.second == processName) {
-	//		size_t index = entry.first; // Get the starting index
-	//		return &memory[index];     // Return the memory pointer
-	//	}
-
-	///*	cout << "Process Name: " << processName << endl;
-	//	cout << "Index: " << entry.first << endl;*/
-	//}
 
 	for (size_t i = 0; i < maximumSize - size + 1; ++i) {
 		if (processName == allocationMap[i]) {

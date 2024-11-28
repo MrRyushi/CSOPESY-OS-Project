@@ -191,7 +191,7 @@ void ConsoleManager::displayProcessList() {
     for (const auto& pair : screenMap) {
         shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
 
-        if (screenPtr && screenPtr->getIsRunning()) {
+        if (screenPtr && screenPtr->getIsRunning() && screenPtr->getMemoryUsage() != 0) {
 
             auto coreID = screenPtr->getCPUCoreID();
             string coreIDstr;
@@ -418,7 +418,7 @@ void ConsoleManager::printProcessSmi() {
     // Iterate through screenMap to get running processes and their memory usage
     for (const auto& pair : screenMap) {
         auto screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
-        if (screenPtr && !screenPtr->isFinished() && screenPtr->getIsRunning()) {  // Only show running processes
+        if (screenPtr && !screenPtr->isFinished() && screenPtr->getIsRunning() && screenPtr->getMemoryUsage() != 0) {  // Only show running processes
             size_t memoryUsage = screenPtr->getMemoryUsage();
             cout << "Process: " << screenPtr->getProcessName()
                 << " | Memory: " << memoryUsage << " KB" << endl;
@@ -452,8 +452,8 @@ void ConsoleManager::printVmstat() {
     cout << "Idle CPU Ticks: " << Scheduler::getInstance()->getIdleCpuTicks() << endl;
     cout << "Active CPU Ticks: " << Scheduler::getInstance()->getCpuCycles() << endl;
     cout << "Total CPU Ticks: " << Scheduler::getInstance()->getCpuCycles() + Scheduler::getInstance()->getIdleCpuTicks() << endl;
-    cout << "Num paged in: " << endl;
-    cout << "Num paged out: " << endl;
+	cout << "Num paged in: " << PagingAllocator::getInstance()->getNumPagedIn() << endl;
+    cout << "Num paged out: " << PagingAllocator::getInstance()->getNumPagedOut() << endl << endl;
     //cout << "Idle CPU Ticks: " << Scheduler::getInstance()->getIdleCpuTicks() << endl;
     //cout << "Active CPU Ticks: " << Scheduler::getInstance()->getActiveCpuTicks() << endl;
     //cout << "Total CPU Ticks: " << Scheduler::getInstance()->getTotalCpuTicks() << endl;
@@ -532,7 +532,7 @@ size_t ConsoleManager::getMaxMemPerProc() {
 void ConsoleManager::setNumPages() {
     std::random_device rd;
     std::mt19937 gen(rd());
-    std::uniform_int_distribution<> dis((int)ConsoleManager::getInstance()->getMinMemPerProc(), (int)ConsoleManager::getInstance()->getMaxMemPerProc());
+    std::uniform_int_distribution<> dis(ConsoleManager::getInstance()->getMinMemPerProc(), ConsoleManager::getInstance()->getMaxMemPerProc());
 
     this->numPages = dis(gen) / ConsoleManager::getInstance()->getMemPerFrame();
 }

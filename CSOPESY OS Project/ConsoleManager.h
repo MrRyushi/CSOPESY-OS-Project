@@ -106,7 +106,7 @@ private:
 	size_t memPerFrame = 0;
 	size_t minMemPerProc = 0;
 	size_t maxMemPerProc = 0;
-	int numPages = 0;
+	size_t numPages = 0;
 
 
 	// declare consoles 
