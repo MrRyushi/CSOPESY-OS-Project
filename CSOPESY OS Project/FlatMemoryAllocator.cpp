@@ -123,8 +123,6 @@ void FlatMemoryAllocator::deallocate(void* ptr, std::shared_ptr<Screen> process)
 	// Proceed with deallocation
 	if (allocationMap[index] != "") {
 		deallocateAt(index, process);
-		//process->setIsRunning(false);
-
 	}
 	process->setMemoryUsage(0);
 }
@@ -197,8 +195,8 @@ void FlatMemoryAllocator::deallocateAt(size_t index, std::shared_ptr<Screen> pro
 	//cout << "process name: " << process->getProcessName() << endl;
 	for (size_t i = index; i < index + size && i < maximumSize; ++i) {
 		allocationMap[i]  = "";
-		/*cout << "deallocateAt: " << i << endl;*/
 	}
+	
 	allocatedSize -= size;
 
 	// Deduct from process memory usage

@@ -30,6 +30,7 @@ public:
     static void initialize(int numCores);
 	bool getSchedulerTestRunning() const;
 	void setSchedulerTestRunning(int schedulerTestRunning);
+	void addToFrontOfProcessQueue(std::shared_ptr<Screen> process);
 
     int getCoresUsed() const;
     int getCoresAvailable() const;
