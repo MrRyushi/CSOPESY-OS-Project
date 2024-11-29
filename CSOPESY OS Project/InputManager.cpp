@@ -4,6 +4,7 @@ using namespace std;
 #include <iostream>
 #include "ConsoleManager.h"
 #include "FlatMemoryAllocator.h"
+#include "PagingAllocator.h"
 #include "Screen.h"
 
 InputManager::InputManager()
@@ -60,17 +61,22 @@ void InputManager::handleMainConsoleInput()
     // Main Console commands
     if (ConsoleManager::getInstance()->getCurrentConsole()->getConsoleName() == MAIN_CONSOLE) {
         if (command == "initialize") {
-            ConsoleManager::getInstance()->setInitialized(true);
-            ConsoleManager::getInstance()->initializeConfiguration();
+            if (!ConsoleManager::getInstance()->getInitialized()) {
+                ConsoleManager::getInstance()->setInitialized(true);
 
-            // Start scheduler
-            Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());
-            std::thread schedulerThread([&] {
-                Scheduler::getInstance()->start();
-            });
-            schedulerThread.detach();
+                // Start scheduler
+                Scheduler::getInstance()->initialize(ConsoleManager::getInstance()->getNumCpu());
+                std::thread schedulerThread([&] {
+                    Scheduler::getInstance()->start();
+                    });
+                schedulerThread.detach();
 
-            cout << "'Processor Configuration Initialized'" << endl;
+                cout << "'Processor Configuration Initialized'" << endl;
+            }
+            else {
+				cout << "Processor Configuration already initialized." << endl;
+
+            }
         }
         else if (command == "exit") {
             ConsoleManager::getInstance()->exitApplication();
@@ -106,8 +112,19 @@ void InputManager::handleMainConsoleInput()
             system("cls");
             ConsoleManager::getInstance()->drawConsole();
         }
-        else if (command == "memory") {
-			FlatMemoryAllocator::getInstance()->printMemoryInfo(ConsoleManager::getInstance()->getTimeSlice());
+        else if (command == "vmstat") {
+            if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+                size_t memoryUsage = FlatMemoryAllocator::getInstance()->getTotalMemoryUsage();
+            }
+            else {
+                size_t usedFrames = PagingAllocator::getInstance()->calculateUsedFrames();
+                PagingAllocator::getInstance()->setUsedMemory(usedFrames * ConsoleManager::getInstance()->getMemPerFrame());
+            }
+
+            ConsoleManager::getInstance()->printVmstat();
+        }
+        else if (command == "process-smi") {
+			ConsoleManager::getInstance()->printProcessSmi();
         }
         else if (command == "screen") {
             if (tokens.size() > 1) {
@@ -120,7 +137,8 @@ void InputManager::handleMainConsoleInput()
                     }
                     else {
                         string timestamp = ConsoleManager::getInstance()->getCurrentTimestamp();
-                        auto screenInstance = std::make_shared<Screen>(processName, 0, timestamp, ConsoleManager::getInstance()->getMemPerProc());
+                        // TODO: should be either 256 or 512 if num per memory frame is 256?
+                        auto screenInstance = std::make_shared<Screen>(processName, 0, timestamp, ConsoleManager::getInstance()->getMinMemPerProc());
                         ConsoleManager::getInstance()->registerConsole(screenInstance);
 
                         ConsoleManager::getInstance()->switchConsole(processName);
@@ -134,6 +152,13 @@ void InputManager::handleMainConsoleInput()
                 }
                 else if (screenCommand == "-ls") {
                     ConsoleManager::getInstance()->displayProcessList();
+                    /*if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+                        FlatMemoryAllocator::getInstance()->visualizeBackingStore();
+                    }
+                    else {
+                        PagingAllocator::getInstance()->visualizeBackingStore();
+                    }*/
+                    
                 }
                 else {
                     cout << "Command not recognized." << endl;
