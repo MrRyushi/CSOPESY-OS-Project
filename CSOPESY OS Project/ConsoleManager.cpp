@@ -2,9 +2,13 @@
 using namespace std;
 
 #include "ConsoleManager.h"
+#include "FlatMemoryAllocator.h"
+#include "PagingAllocator.h"
 #include <iostream>
 #include <unordered_map>
 #include "Screen.h"
+#include <random>
+
 
 
 // stores the created instance of console manager
@@ -15,16 +19,7 @@ ConsoleManager::ConsoleManager() {
 
 void ConsoleManager::initialize() {
     consoleManager = new ConsoleManager();
-
-	
-
-	/*consoleManager->scheduler.initialize(num_cpu);
-	consoleManager->scheduler.start();
-	consoleManager->running = true;
-	consoleManager->switchSuccessful = true;
-	consoleManager->initialized = false;
-	consoleManager->currentConsole = nullptr;
-	consoleManager->screenMap = unordered_map<string, shared_ptr<BaseScreen>>();*/
+    ConsoleManager::getInstance()->initializeConfiguration();
 }
 
 void ConsoleManager::initializeConfiguration() {
@@ -67,28 +62,51 @@ void ConsoleManager::initializeConfiguration() {
             }
             else if (key == "batch-process-freq") {
                 ConsoleManager::getInstance()->setBatchProcessFrequency(stoi(value));
+            } 
+            else if (key == "max-overall-mem") {
+				ConsoleManager::getInstance()->setMaxOverallMem(stoi(value));
             }
+            else if (key == "mem-per-frame") {
+                ConsoleManager::getInstance()->setMemPerFrame(stoi(value));
+            }
+            else if (key == "min-mem-per-proc") {
+				ConsoleManager::getInstance()->setMinMemPerProc(stoi(value));
+			}
+			else if (key == "max-mem-per-proc") {
+				ConsoleManager::getInstance()->setMaxMemPerProc(stoi(value));
+            }
+           
         }
         fclose(file);
     }
 
 
 	Scheduler* scheduler = Scheduler::getInstance();
+
+    setNumPages();
 }
 
+
+
 void ConsoleManager::schedulerTest() {
+    static int process_counter = 0;
+    
+
     while (Scheduler::getInstance()->getSchedulerTestRunning()) {
         for (int i = 0; i < ConsoleManager::getInstance()->getBatchProcessFrequency(); i++) {
-            string processName = "cycle" + std::to_string(ConsoleManager::getInstance()->cpuCycles) + "processName" + std::to_string(i);
-            shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, ConsoleManager::getInstance()->getCurrentTimestamp());
+            process_counter++;
+           /* string processName = "cycle" + std::to_string(ConsoleManager::getInstance()->cpuCycles) + "processName" + std::to_string(i);*/
+            string processName = "P" + std::to_string(process_counter);
+            shared_ptr<BaseScreen> processScreen = make_shared<Screen>(processName, 0, ConsoleManager::getInstance()->getCurrentTimestamp(), ConsoleManager::getInstance()->getMinMemPerProc());
             shared_ptr<Screen> screenPtr = static_pointer_cast<Screen>(processScreen);
             Scheduler::getInstance()->addProcessToQueue(screenPtr);
             ConsoleManager::getInstance()->registerConsole(processScreen);
             ConsoleManager::getInstance()->cpuCycles++;
-            //cout << "Process " << processName << " added to queue." << endl;
-
+            
+            std::this_thread::sleep_for(std::chrono::milliseconds(1000));
         }
-		std::this_thread::sleep_for(std::chrono::milliseconds(1000));
+
+		
     }
 }
 
@@ -173,7 +191,7 @@ void ConsoleManager::displayProcessList() {
     for (const auto& pair : screenMap) {
         shared_ptr<Screen> screenPtr = dynamic_pointer_cast<Screen>(pair.second);
 
-        if (screenPtr && !screenPtr->isFinished()) {
+        if (screenPtr && screenPtr->getIsRunning() && screenPtr->getMemoryUsage() != 0) {
 
             auto coreID = screenPtr->getCPUCoreID();
             string coreIDstr;
@@ -239,6 +257,7 @@ void ConsoleManager::reportUtil() {
     }
 
     logStream << "\nFinished processes:" << std::endl;
+    
 
     // Log details of finished processes
     for (const auto& pair : screenMap) {
@@ -266,7 +285,22 @@ void ConsoleManager::reportUtil() {
     }
 }
 
+void ConsoleManager::initializeAllocators() {
+    FlatMemoryAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
+    PagingAllocator::initialize(ConsoleManager::getInstance()->getMaxOverallMem());
+}
 
+std::shared_ptr<Screen> ConsoleManager::getScreenByProcessName(const std::string& processName) {
+    unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
+    auto it = screenMap.find(processName);
+    if (it != screenMap.end()) {
+        std::shared_ptr<Screen> process = std::dynamic_pointer_cast<Screen>(it->second);
+        if(process) {
+            return process;  // Successfully casted to Screen
+        }
+    }
+    return nullptr;  // Process not found
+}
 
 int ConsoleManager::getNumCpu() {
 	return this->num_cpu;
@@ -365,15 +399,66 @@ void ConsoleManager::printProcess(string enteredProcess){
 }
 
 void ConsoleManager::printProcessSmi() {
-	cout << "Process: " << this->consoleName << endl;
-    if (this->screenMap[consoleName]->getCurrentLine() == this->screenMap[consoleName]->getTotalLine()) {
-		cout << "Finished!" << endl;
+    unordered_map<string, shared_ptr<BaseScreen>> screenMap = ConsoleManager::getInstance()->getScreenMap();
+    Scheduler* scheduler = Scheduler::getInstance();
+    int coresUsed = scheduler->getCoresUsed();
+    int coresAvailable = scheduler->getCoresAvailable();
+    float cpuUtilization = static_cast<float>(coresUsed) / (coresUsed + coresAvailable) * 100;
+
+    cout << "--------------------------------------------------" << endl;
+    cout << "|    PROCESS-SMI V01.00 Driver Version 01.00      |" << endl;
+    cout << "--------------------------------------------------" << endl;
+    cout << "CPU Utilization: " << cpuUtilization << "%" << endl;
+    getMemoryUsage();
+
+    cout << "===================================================" << endl;
+    cout << "Running processes and memory usage:" << endl;
+    cout << "---------------------------------------------------" << endl;
+
+    // Iterate through screenMap to get running processes and their memory usage
+    for (const auto& pair : screenMap) {
+        auto screenPtr = std::dynamic_pointer_cast<Screen>(pair.second);
+        if (screenPtr && !screenPtr->isFinished() && screenPtr->getIsRunning() && screenPtr->getMemoryUsage() != 0) {  // Only show running processes
+            size_t memoryUsage = screenPtr->getMemoryUsage();
+            cout << "Process: " << screenPtr->getProcessName()
+                << " | Memory: " << memoryUsage << " KB" << endl;
+        }
+    }
+
+	cout << "===================================================" << endl << endl;
+}
+
+void ConsoleManager::getMemoryUsage() {
+    if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+        cout << "Memory Usage: " << FlatMemoryAllocator::getInstance()->visualizeMemory() << endl;
     }
     else {
-        cout << "Current Line: " << this->screenMap[consoleName]->getCurrentLine() << endl;
-        cout << "Lines of Code: " << this->screenMap[consoleName]->getTotalLine() << endl;
+        PagingAllocator::getInstance()->visualizeMemory();
     }
-	
+}
+
+void ConsoleManager::printVmstat() {
+    cout << "Total Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() << " KB" << endl;
+    if (ConsoleManager::getInstance()->getMinMemPerProc() == ConsoleManager::getInstance()->getMaxMemPerProc()) {
+        cout << "Used Memory: " << FlatMemoryAllocator::getInstance()->getTotalMemoryUsage() << " KB" << endl;
+        cout << "Free Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() - FlatMemoryAllocator::getInstance()->getTotalMemoryUsage() << " KB" << endl;
+    }
+    else {
+        cout << "Used Memory: " << PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
+        cout << "Free Memory: " << ConsoleManager::getInstance()->getMaxOverallMem() - PagingAllocator::getInstance()->getUsedMemory() << " KB" << endl;
+    }
+    
+    
+    cout << "Idle CPU Ticks: " << Scheduler::getInstance()->getIdleCpuTicks() << endl;
+    cout << "Active CPU Ticks: " << Scheduler::getInstance()->getCpuCycles() << endl;
+    cout << "Total CPU Ticks: " << Scheduler::getInstance()->getCpuCycles() + Scheduler::getInstance()->getIdleCpuTicks() << endl;
+	cout << "Num paged in: " << PagingAllocator::getInstance()->getNumPagedIn() << endl;
+    cout << "Num paged out: " << PagingAllocator::getInstance()->getNumPagedOut() << endl << endl;
+    //cout << "Idle CPU Ticks: " << Scheduler::getInstance()->getIdleCpuTicks() << endl;
+    //cout << "Active CPU Ticks: " << Scheduler::getInstance()->getActiveCpuTicks() << endl;
+    //cout << "Total CPU Ticks: " << Scheduler::getInstance()->getTotalCpuTicks() << endl;
+    //cout << "Num paged in: " << PagingAllocator::getInstance()->getNumPagedIn() << endl;
+    //cout << "Num paged out: " << PagingAllocator::getInstance()->getNumPagedOut() << endl;
 }
 
 shared_ptr<BaseScreen> ConsoleManager::getCurrentConsole()
@@ -410,6 +495,50 @@ void ConsoleManager::setInitialized(bool initialized) {
 
 bool ConsoleManager::getInitialized() {
 	return this->initialized;
+}
+
+void ConsoleManager::setMaxOverallMem(size_t maxOverallMem) {
+	this->maxOverallMem = maxOverallMem;
+}
+
+void ConsoleManager::setMemPerFrame(size_t memPerFrame) {
+	this->memPerFrame = memPerFrame;
+}
+
+void ConsoleManager::setMinMemPerProc(size_t minMemPerProc) {
+	this->minMemPerProc = minMemPerProc;
+}
+
+void ConsoleManager::setMaxMemPerProc(size_t maxMemPerProc) {
+	this->maxMemPerProc = maxMemPerProc;
+}
+
+size_t ConsoleManager::getMaxOverallMem() {
+	return this->maxOverallMem;
+}
+
+size_t ConsoleManager::getMemPerFrame() {
+	return this->memPerFrame;
+}
+
+size_t ConsoleManager::getMinMemPerProc() {
+	return this->minMemPerProc;
+}
+
+size_t ConsoleManager::getMaxMemPerProc() {
+	return this->maxMemPerProc;
+}
+
+void ConsoleManager::setNumPages() {
+    std::random_device rd;
+    std::mt19937 gen(rd());
+    std::uniform_int_distribution<> dis(ConsoleManager::getInstance()->getMinMemPerProc(), ConsoleManager::getInstance()->getMaxMemPerProc());
+
+    this->numPages = dis(gen) / ConsoleManager::getInstance()->getMemPerFrame();
+}
+
+int ConsoleManager::getNumPages() {
+	return this->numPages;
 }
 
 void ConsoleManager::printHeader() {

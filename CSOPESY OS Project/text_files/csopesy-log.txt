@@ -1,62 +1,11 @@
 
-CPU Utilization: 100%
-Cores used: 16
-Cores available: 0
+CPU Utilization: 50%
+Cores used: 1
+Cores available: 1
 -----------------------------------
 Running processes:
-Name: cycle1processName0 | 11/04/2024, 09:31:12 PM | Core: 5 | 2363/5000 | 
-Name: cycle36processName0 | 11/04/2024, 09:31:48 PM | Core: 8 | 522/5000 | 
-Name: cycle0processName0 | 11/04/2024, 09:31:11 PM | Core: 15 | 2425/5000 | 
-Name: cycle2processName0 | 11/04/2024, 09:31:13 PM | Core: 7 | 2290/5000 | 
-Name: cycle3processName0 | 11/04/2024, 09:31:14 PM | Core: 0 | 2225/5000 | 
-Name: cycle4processName0 | 11/04/2024, 09:31:15 PM | Core: 13 | 2160/5000 | 
-Name: cycle5processName0 | 11/04/2024, 09:31:16 PM | Core: 14 | 2095/5000 | 
-Name: cycle6processName0 | 11/04/2024, 09:31:18 PM | Core: 4 | 2030/5000 | 
-Name: cycle48processName0 | 11/04/2024, 09:32:01 PM | Core: 14 | 224/5000 | 
-Name: cycle7processName0 | 11/04/2024, 09:31:19 PM | Core: 9 | 1960/5000 | 
-Name: cycle49processName0 | 11/04/2024, 09:32:02 PM | Core: 2 | 200/5000 | 
-Name: cycle8processName0 | 11/04/2024, 09:31:20 PM | Core: 11 | 1896/5000 | 
-Name: cycle46processName0 | 11/04/2024, 09:31:59 PM | Core: 12 | 269/5000 | 
-Name: cycle9processName0 | 11/04/2024, 09:31:21 PM | Core: 12 | 1830/5000 | 
-Name: cycle47processName0 | 11/04/2024, 09:32:00 PM | Core: 3 | 245/5000 | 
-Name: cycle10processName0 | 11/04/2024, 09:31:22 PM | Core: 11 | 1760/5000 | 
-Name: cycle11processName0 | 11/04/2024, 09:31:23 PM | Core: 9 | 1700/5000 | 
-Name: cycle12processName0 | 11/04/2024, 09:31:24 PM | Core: 15 | 1630/5000 | 
-Name: cycle13processName0 | 11/04/2024, 09:31:25 PM | Core: 4 | 1563/5000 | 
-Name: cycle14processName0 | 11/04/2024, 09:31:26 PM | Core: 4 | 1505/5000 | 
-Name: cycle15processName0 | 11/04/2024, 09:31:27 PM | Core: 8 | 1435/5000 | 
-Name: cycle16processName0 | 11/04/2024, 09:31:28 PM | Core: 13 | 1370/5000 | 
-Name: cycle17processName0 | 11/04/2024, 09:31:29 PM | Core: 0 | 1310/5000 | 
-Name: cycle18processName0 | 11/04/2024, 09:31:30 PM | Core: 2 | 1239/5000 | 
-Name: cycle19processName0 | 11/04/2024, 09:31:31 PM | Core: 5 | 1190/5000 | 
-Name: cycle20processName0 | 11/04/2024, 09:31:32 PM | Core: 9 | 1133/5000 | 
-Name: cycle21processName0 | 11/04/2024, 09:31:33 PM | Core: 15 | 1085/5000 | 
-Name: cycle22processName0 | 11/04/2024, 09:31:34 PM | Core: 6 | 1040/5000 | 
-Name: cycle23processName0 | 11/04/2024, 09:31:35 PM | Core: 10 | 990/5000 | 
-Name: cycle24processName0 | 11/04/2024, 09:31:36 PM | Core: 10 | 946/5000 | 
-Name: cycle25processName0 | 11/04/2024, 09:31:37 PM | Core: 12 | 905/5000 | 
-Name: cycle26processName0 | 11/04/2024, 09:31:38 PM | Core: 7 | 865/5000 | 
-Name: cycle27processName0 | 11/04/2024, 09:31:39 PM | Core: 6 | 825/5000 | 
-Name: cycle28processName0 | 11/04/2024, 09:31:40 PM | Core: 0 | 787/5000 | 
-Name: cycle29processName0 | 11/04/2024, 09:31:41 PM | Core: 1 | 750/5000 | 
-Name: cycle30processName0 | 11/04/2024, 09:31:42 PM | Core: 3 | 715/5000 | 
-Name: cycle31processName0 | 11/04/2024, 09:31:43 PM | Core: 11 | 680/5000 | 
-Name: cycle32processName0 | 11/04/2024, 09:31:44 PM | Core: 6 | 645/5000 | 
-Name: cycle33processName0 | 11/04/2024, 09:31:45 PM | Core: 13 | 615/5000 | 
-Name: cycle34processName0 | 11/04/2024, 09:31:46 PM | Core: 10 | 585/5000 | 
-Name: cycle35processName0 | 11/04/2024, 09:31:47 PM | Core: 1 | 555/5000 | 
-Name: cycle37processName0 | 11/04/2024, 09:31:49 PM | Core: 8 | 495/5000 | 
-Name: cycle38processName0 | 11/04/2024, 09:31:50 PM | Core: 14 | 470/5000 | 
-Name: cycle39processName0 | 11/04/2024, 09:31:51 PM | Core: 2 | 440/5000 | 
-Name: cycle40processName0 | 11/04/2024, 09:31:52 PM | Core: 13 | 410/5000 | 
-Name: cycle41processName0 | 11/04/2024, 09:31:54 PM | Core: 11 | 385/5000 | 
-Name: cycle42processName0 | 11/04/2024, 09:31:55 PM | Core: 10 | 360/5000 | 
-Name: cycle43processName0 | 11/04/2024, 09:31:56 PM | Core: 7 | 337/5000 | 
-Name: cycle44processName0 | 11/04/2024, 09:31:57 PM | Core: 1 | 313/5000 | 
-Name: cycle45processName0 | 11/04/2024, 09:31:58 PM | Core: 5 | 290/5000 | 
-Name: cycle50processName0 | 11/04/2024, 09:32:03 PM | Core: 3 | 177/5000 | 
-Name: cycle51processName0 | 11/04/2024, 09:32:04 PM | Core: 6 | 155/5000 | 
-Name: cycle52processName0 | 11/04/2024, 09:32:05 PM | Core: 15 | 135/5000 | 
+Name: p1 | 11/24/2024, 03:54:36 AM | Core: 0 | 81/4000 | 
+Name: p2 | 11/24/2024, 03:54:39 AM | Core: N/A | 0/4000 | 
 
 Finished processes:
 -----------------------------------

@@ -14,14 +14,16 @@ using namespace std;
 
 namespace fs = std::filesystem; // alias for convenience
 
-Screen::Screen(string processName, int currentLine, string timestamp)
+Screen::Screen(string processName, int currentLine, string timestamp, size_t memoryRequired)
     : BaseScreen(processName), cpuCoreID(-1), commandCounter(0), currentState(ProcessState::READY)
 {
     this->processName = processName;
     this->currentLine = currentLine;
 	this->setRandomIns();
+	this->memoryRequired = memoryRequired;
     this->timestamp = timestamp;
 
+	this->numPages = ConsoleManager::getInstance()->getNumPages();
 
 	// create 100 print commands
 	for(int i=0; i<totalLine; i++){
@@ -29,12 +31,27 @@ Screen::Screen(string processName, int currentLine, string timestamp)
 
 	}
 
-	/*
-	for(int i = 0; i < this->printCommands.size(); i++){
-		this->printCommands[i].execute();
-		std::this_thread::sleep_for(std::chrono::milliseconds(500));
-	}*/
 	
+}
+
+void Screen::setMemoryUsage(size_t memoryUsage)
+{
+	this->memoryUsage = memoryUsage;
+}
+
+size_t Screen::getMemoryUsage() const
+{
+	return this->memoryUsage;
+}
+
+void Screen::setIsRunning(bool isRunning)
+{
+	this->isRunning = isRunning;
+}
+
+bool Screen::getIsRunning() const
+{
+	return this->isRunning;
 }
 
 void Screen::setRandomIns() {
@@ -90,6 +107,16 @@ string Screen::getTimestamp()
 
 string Screen::getTimestampFinished() {
 	return timestampFinished;
+}
+
+size_t Screen::getNumPages()
+{
+	return this->numPages;
+}
+
+void Screen::setNumPages(size_t numPages)
+{
+	this->numPages = numPages;
 }
 
 void Screen::setTimestampFinished(string timestampFinished) {
@@ -154,4 +181,14 @@ void Screen::viewFile()
 		cout << "\"" << endl;
 	}
 	file.close();
+}
+
+size_t Screen::getMemoryRequired() const
+{
+	return this->memoryRequired;
+}
+
+void Screen::setMemoryRequired(size_t memoryRequired)
+{
+	this->memoryRequired = memoryRequired;
 }

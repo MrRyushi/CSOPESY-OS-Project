@@ -25,24 +25,30 @@ public:
     void start();
     void stop();
     void addProcessToQueue(std::shared_ptr<Screen> process);
-    void workerFunction(int core, std::shared_ptr<Screen> process);
+    void workerFunction(int core, std::shared_ptr<Screen> process, void* ptr);
     static Scheduler* getInstance();
     static void initialize(int numCores);
 	bool getSchedulerTestRunning() const;
 	void setSchedulerTestRunning(int schedulerTestRunning);
+	void addToFrontOfProcessQueue(std::shared_ptr<Screen> process);
 
     int getCoresUsed() const;
     int getCoresAvailable() const;
+    int getIdleCpuTicks();
     int coresUsed = 0; // Tracks how many cores are currently used
     int coresAvailable; // Tracks how many cores are available
 
 	int getCpuCycles() const;
 	void setCpuCycles(int cpuCycles);
 
+    //void* getMemoryPtr();
+
 private:
     int numCores;
     int cpuCycles = 0;
+    int idleCpuTicks = 0;
     bool schedulerRunning;
+	int activeThreads;
     bool schedulerTestRunning = false;
     std::vector<std::thread> workerThreads;
     std::queue<std::shared_ptr<Screen>> processQueue;
@@ -50,6 +56,7 @@ private:
     std::condition_variable processQueueCondition;
     static Scheduler* scheduler;
     string algorithm = "";
+    //void* memoryPtr;
 };
 
 #endif // SCHEDULER_H
