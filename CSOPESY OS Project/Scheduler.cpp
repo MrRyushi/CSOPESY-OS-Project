@@ -50,6 +50,8 @@ void Scheduler::start() {
 
                     process = processQueue.front();
                     processQueue.pop();
+					//cout << "Process " << process->getProcessName() << "maximum line " << process->getTotalLine() << " current line " << process->getCurrentLine() << endl;
+                    
                     ++activeThreads; // Increment active thread count
                 }
 
@@ -91,11 +93,14 @@ void Scheduler::start() {
 					
                     }
                 }
-              
+                
 
                 if (memoryPtr || processInMemory) {
-                    coresAvailable--;
-                    coresUsed++;
+                    {
+                        std::lock_guard<std::mutex> lock(processQueueMutex);
+                        coresAvailable--;
+                        coresUsed++;
+                    }
                     process->setCPUCoreID(i);
                     process->setIsRunning(true);
                     workerFunction(i, process, memoryPtr);
@@ -107,8 +112,11 @@ void Scheduler::start() {
 						addToFrontOfProcessQueue(process);
                     }
                     else {
-                        coresAvailable--;
-                        coresUsed++;
+                        {
+                            std::lock_guard<std::mutex> lock(processQueueMutex);
+                            coresAvailable--;
+                            coresUsed++;
+                        }
                         // if flat memory
                         if (isFlatMemory) {
                             // get oldest process
@@ -122,6 +130,9 @@ void Scheduler::start() {
 
                             // put the oldest process back to backing store
                             FlatMemoryAllocator::getInstance()->allocateFromBackingStore(oldestProcess);
+
+							// print a file of the backing store
+							FlatMemoryAllocator::getInstance()->visualizeBackingStore();
 
                             // if the new process is in backing store, remove it from the backing store
                             FlatMemoryAllocator::getInstance()->findAndRemoveProcessFromBackingStore(process);
@@ -147,6 +158,9 @@ void Scheduler::start() {
                             // put the oldest process back to backing store
                             PagingAllocator::getInstance()->allocateFromBackingStore(oldestProcess);
 
+							// print a file of the backing store
+							PagingAllocator::getInstance()->visualizeBackingStore();
+
                             // if the new process is in backing store, remove it from the backing store
                             PagingAllocator::getInstance()->findAndRemoveProcessFromBackingStore(process);
 
@@ -166,8 +180,6 @@ void Scheduler::start() {
                 // Update core tracking after process completion
                 {
                     std::lock_guard<std::mutex> lock(processQueueMutex);
-
-
                     
 
                     --activeThreads; // Decrement active thread count
@@ -225,6 +237,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
                 for (int i = 0; i < ConsoleManager::getInstance()->getDelayPerExec(); i++) {
                     std::this_thread::sleep_for(std::chrono::milliseconds(100));
                 }
+
             }
             else {
 				std::this_thread::sleep_for(std::chrono::milliseconds(100));
@@ -259,7 +272,7 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
     else if (algorithm == "rr") {
         // Round-Robin logic
         int quantum = ConsoleManager::getInstance()->getTimeSlice();  // Get RR time slice
-
+	
         // Process for the duration of the quantum or until the process is finished
         for (int i = 0; i < quantum && process->getCurrentLine() < process->getTotalLine(); i++) {
             if (ConsoleManager::getInstance()->getDelayPerExec() != 0) {
@@ -270,7 +283,10 @@ void Scheduler::workerFunction(int core, std::shared_ptr<Screen> process, void* 
             else {
                 std::this_thread::sleep_for(std::chrono::milliseconds(100));
             }
+			//cout << "running rr" << process->getProcessName() << " " << process->getCurrentLine() << " " << process->getTotalLine() << endl;
             process->setCurrentLine(process->getCurrentLine() + 1);
+            PagingAllocator::getInstance()->setNumPagedIn(PagingAllocator::getInstance()->getNumPagedIn() + 1);
+            PagingAllocator::getInstance()->setNumPagedOut(PagingAllocator::getInstance()->getNumPagedOut() + 1);
 
             // Increment active cpu tick
             cpuCycles++;

@@ -25,6 +25,8 @@ public:
 	std::string findOldestProcess();
 	bool isProcessInMemory(const std::string& processName);
 	void visualizeBackingStore();
+	void setNumPagedIn(size_t value);
+	void setNumPagedOut(size_t value);
 
 	size_t getNumPagedIn() const;
 	size_t getNumPagedOut() const;

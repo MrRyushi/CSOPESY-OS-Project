@@ -34,6 +34,9 @@ PagingAllocator* PagingAllocator::getInstance() {
 
 
 std::mutex allocationMap2Mutex;
+std::mutex frameMapMutex;
+std::mutex freeFrameListMutex;
+std::mutex numPagedOutMutex;
 
 bool PagingAllocator::allocate(std::shared_ptr<Screen> process) {
 	{
@@ -66,7 +69,11 @@ bool PagingAllocator::allocate(std::shared_ptr<Screen> process) {
 }
 
 void PagingAllocator::deallocate(std::shared_ptr<Screen> process) {
-		string processName = process->getProcessName();
+	std::string processName = process->getProcessName();
+
+	// Lock the frame map to find all frames belonging to the process
+	{
+		std::lock_guard<std::mutex> lock(frameMapMutex);
 
 		auto it = std::find_if(frameMap.begin(), frameMap.end(),
 			[&processName](const std::pair<const size_t, std::string>& entry) {
@@ -75,29 +82,38 @@ void PagingAllocator::deallocate(std::shared_ptr<Screen> process) {
 
 		while (it != frameMap.end()) {
 			size_t frameIndex = it->first;
+
+			// Deallocate a single frame
 			deallocateFrames(1, frameIndex);
+
+			// Find the next frame for the same process
 			it = std::find_if(frameMap.begin(), frameMap.end(),
-				[processName](const auto& entry) { return entry.second == processName; });
-			// Deduct from process memory usage
-			if (processMemoryMap.find(process->getProcessName()) != processMemoryMap.end()) {
-				processMemoryMap[process->getProcessName()] -= process->getMemoryRequired();
-				process->setMemoryUsage(0);
-				if (processMemoryMap[process->getProcessName()] == 0) {
-					processMemoryMap.erase(process->getProcessName());  // Clean up zero usage
-				}
-			}
-
-
+				[&processName](const std::pair<const size_t, std::string>& entry) {
+					return entry.second == processName;
+				});
 		}
+	}
 
-		// process->setIsRunning(false);
-		
-		/*cout << "PROCESS: " << process->getIsRunning() << endl;*/
+	// Update memory usage for the process
+	{
+		std::lock_guard<std::mutex> lock(frameMapMutex); // Lock required for safe access to processMemoryMap
+		if (processMemoryMap.find(processName) != processMemoryMap.end()) {
+			processMemoryMap[processName] -= process->getMemoryRequired();
+			process->setMemoryUsage(0);
+
+			if (processMemoryMap[processName] == 0) {
+				processMemoryMap.erase(processName); // Remove entry if no memory remains allocated
+			}
+		}
+	}
+
+	// Remove process from allocation map
 	{
 		std::lock_guard<std::mutex> lock(allocationMap2Mutex);
 		allocationMap.pop();
 	}
 }
+
 
 bool PagingAllocator::isProcessInMemory(const std::string& processName) {
 	for (const auto& frame : frameMap) {
@@ -109,23 +125,41 @@ bool PagingAllocator::isProcessInMemory(const std::string& processName) {
 }
 
 
+
 void PagingAllocator::visualizeBackingStore() {
-	if (backingStore.empty()) {
-		std::cout << "Backing store is empty." << std::endl;
+	static int fileCounter = 0; // Persistent counter to increment file names
+
+	// Create a file name with the current counter
+	std::ostringstream fileName;
+	fileName << "BackingStore_Visualization_" << fileCounter++ << ".txt";
+
+	std::ofstream outFile(fileName.str()); // Open the file for writing
+	if (!outFile) {
+		std::cerr << "Failed to create the file: " << fileName.str() << std::endl;
 		return;
 	}
 
-	std::cout << "Backing Store Contents:" << std::endl;
+	if (backingStore.empty()) {
+		outFile << "Backing store is empty." << std::endl;
+		return;
+	}
+
+	// Write contents to the file
+	outFile << "Backing Store Contents:" << std::endl;
 
 	size_t index = 0; // Index to track the position of the process in the queue
 	for (const auto& process : backingStore) {
-		// Access information from the Screen object
-		std::cout << "Index: " << index++
-			<< ", Process Name: " << process->getProcessName()
-			<< ", Memory Usage: " << process->getMemoryUsage()
-			<< " KB" << std::endl;
+		if (process) { // Ensure process is not nullptr
+			outFile << "Index: " << index++ <<  " " << process->getProcessName() << std::endl;
+		}
+		else {
+			//std::cerr << "Encountered a null process in backingStore." << std::endl;
+		}
 	}
+
 }
+
+
 
 
 
@@ -157,7 +191,11 @@ size_t PagingAllocator::calculateUsedFrames() {
 }
 
 size_t PagingAllocator::allocateFrames(size_t numFrames, string processName) {
+	if (freeFrameList.size() < numFrames) {
+		//throw std::runtime_error("Not enough free frames available for allocation.");
+	}
 	size_t frameIndex = freeFrameList.back();
+
 
 	for (size_t i = 0; i < numFrames; ++i) {
 		frameMap[frameIndex + i] = processName;
@@ -168,16 +206,17 @@ size_t PagingAllocator::allocateFrames(size_t numFrames, string processName) {
 	
 }
 
+std::mutex allocationMutex; // Replace frameMapMutex and freeFrameListMutex
+
 void PagingAllocator::deallocateFrames(size_t numFrames, size_t frameIndex) {
+	std::lock_guard<std::mutex> lock(allocationMutex); // Use shared mutex
 	for (size_t i = 0; i < numFrames; ++i) {
 		frameMap.erase(frameIndex + i);
-	}
-
-	for (size_t i = 0; i < numFrames; ++i) {
 		freeFrameList.push_back(frameIndex + i);
 	}
 	numPagedOut += numFrames;
 }
+
 
 size_t PagingAllocator::getProcessMemoryUsage(const std::string& processName) {
 	std::cout << "Looking for process: " << processName << std::endl;
@@ -241,6 +280,14 @@ size_t PagingAllocator::getNumPagedIn() const {
 	return numPagedIn;
 }
 
+void PagingAllocator::setNumPagedIn(size_t value) {
+	this->numPagedIn = value;
+}
+
 size_t PagingAllocator::getNumPagedOut() const {
 	return numPagedOut;
+}
+
+void PagingAllocator::setNumPagedOut(size_t value) {
+	this->numPagedOut = value;
 }

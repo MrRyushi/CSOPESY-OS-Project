@@ -1,9 +1,12 @@
 using namespace std;
 
 #include "FlatMemoryAllocator.h"
+#include "PagingAllocator.h"
 #include "ConsoleManager.h"
 #include <algorithm>
 #include <fstream>
+#include <iomanip> // For formatting (optional)
+#include <sstream> // For dynamic file name creation
 
 
 FlatMemoryAllocator::FlatMemoryAllocator(size_t maximumSize) : maximumSize(maximumSize), allocatedSize(0)
@@ -58,6 +61,7 @@ void* FlatMemoryAllocator::allocate(size_t size, string processName, std::shared
 				}
 			}
 		}
+		//PagingAllocator::getInstance()->getInstance()->setNumPagedIn(PagingAllocator::getInstance()->getNumPagedIn() + 1);
 
 	}
 
@@ -125,6 +129,7 @@ void FlatMemoryAllocator::deallocate(void* ptr, std::shared_ptr<Screen> process)
 		deallocateAt(index, process);
 	}
 	process->setMemoryUsage(0);
+	//PagingAllocator::getInstance()->getInstance()->setNumPagedOut(PagingAllocator::getInstance()->getNumPagedOut() + 1);
 }
 
 
@@ -229,23 +234,40 @@ void FlatMemoryAllocator::restoreFromBackingStore() {
 	}
 }
 
+
 void FlatMemoryAllocator::visualizeBackingStore() {
-	if (backingStore.empty()) {
-		std::cout << "Backing store is empty." << std::endl;
+	static int fileCounter = 0; // Persistent counter to increment file names
+
+	// Create a file name with the current counter
+	std::ostringstream fileName;
+	fileName << "BackingStore_Visualization_" << fileCounter++ << ".txt";
+
+	std::ofstream outFile(fileName.str()); // Open the file for writing
+	if (!outFile) {
+		std::cerr << "Failed to create the file: " << fileName.str() << std::endl;
 		return;
 	}
 
-	std::cout << "Backing Store Contents:" << std::endl;
+	if (backingStore.empty()) {
+		outFile << "Backing store is empty." << std::endl;
+		return;
+	}
+
+	// Write contents to the file
+	outFile << "Backing Store Contents:" << std::endl;
 
 	size_t index = 0; // Index to track the position of the process in the queue
 	for (const auto& process : backingStore) {
-		// Access information from the Screen object
-		std::cout << "Index: " << index++
-			<< ", Process Name: " << process->getProcessName()
-			<< ", Memory Usage: " << process->getMemoryUsage()
-			<< " KB" << std::endl;
+		if (process) { // Ensure process is not nullptr
+			outFile << "Index: " << index++ << " " << process->getProcessName() << std::endl;
+		}
+		else {
+			//std::cerr << "Encountered a null process in backingStore." << std::endl;
+		}
 	}
+
 }
+
 
 void FlatMemoryAllocator::printMemoryInfo(int quantum_size) {
 	static int curr_quantum_cycle = 0;  // Counter for unique file naming
